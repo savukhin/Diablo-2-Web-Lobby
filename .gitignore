@@ -1,3 +1,7 @@
+# Server Files
+D2GS/
+PvPGN/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
