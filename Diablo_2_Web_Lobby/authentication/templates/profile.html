@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="grid-container">
+    <div>
+        <h1> This User Name</h1>
+        <div>
+            <p> Character 1 </p>
+            <p> Character 2 </p>
+            <p> Character 3 </p>
+        </div>
+    </div>
+    <div>
+        Some photo
+    </div>
+</div>
+
+{% endblock %}

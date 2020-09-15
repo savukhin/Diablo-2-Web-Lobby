@@ -12,3 +12,7 @@ def signUp(request):
 
 def signOut(request):
     return render(request, template_name='signOut.html')
+
+
+def profile(request):
+    return render(request, template_name='profile.html')
