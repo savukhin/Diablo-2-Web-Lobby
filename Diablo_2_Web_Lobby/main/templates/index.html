@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <!-- Добавление дополнительного статического CSS файла -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <title>Index</title>
+</head>
+<body>
+<div>
+    <div class="row">
+      <div align="left">
+      <ul class="sidebar-nav">
+
+          <li><a href="{% url 'index' %}">Home</a></li>
+          <li><a href="{% url 'sign in' %}">Sign In</a></li>
+          <li><a href="{% url 'sign up' %}">Sign Up</a></li>
+      </ul>
+      </div>
+      <div align="center">
+          <h1>Leviathan Main Page</h1>
+          <p>Welcome to <em>Leviathan server</em></p>
+          <h2>Sign In or Sign Up to check lobbies</h2>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
