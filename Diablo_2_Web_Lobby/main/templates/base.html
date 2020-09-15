@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title> Leviathan </title>
+</head>
+<body>
+<div>
+    <div class="row">
+      <div align="left">
+      <ul class="sidebar-nav">
+
+          <li><a href="{% url 'index' %}">Home</a></li>
+          <li><a href="{% url 'sign in' %}">Sign In</a></li>
+          <li><a href="{% url 'sign up' %}">Sign Up</a></li>
+      </ul>
+      </div>
+      <div align="center">
+          {% block content %} {% endblock %}
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
