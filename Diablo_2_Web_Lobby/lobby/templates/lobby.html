@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
+{% endblock %}
+
+{% block content %}
+
+<form name="test" method="post" action="input1.php">
+    <input type="button" value="Create lobby">
+</form>
+<p></p>
+
+<div style="display: grid; grid-template-columns: auto auto">
+    <div style="background-color: #ff0000; border-style: solid;">
+        <h1>Games</h1>
+        <form name="test" method="post" action="input1.php">
+            <input type="button" value="Game 1">
+            <p></p>
+        </form>
+        <form name="test" method="post" action="input1.php">
+            <input type="button" value="Game 2">
+            <p></p>
+        </form>
+    </div>
+    <div style="background-color: #ff0000; border-style: solid;">
+        <h1>Info</h1>
+        <h3>User: Username </h3>
+        <h3>IP: 47.69.228.1337 </h3>
+        <h3>Player list: </h3>
+        <div>
+            <h4>Player 1</h4>
+            <h4>Player 2</h4>
+            <h4>Player 3</h4>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

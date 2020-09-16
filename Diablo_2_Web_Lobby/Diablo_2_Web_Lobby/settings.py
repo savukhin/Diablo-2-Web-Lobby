@@ -54,8 +54,8 @@ ROOT_URLCONF = 'Diablo_2_Web_Lobby.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['main/templates', 'authentication/templates'],
-        #'DIRS': [os.path.join(BASE_DIR, 'main/templates')],
+        'DIRS': ['main/templates', 'authentication/templates', 'lobby/templates'],
+        #'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
