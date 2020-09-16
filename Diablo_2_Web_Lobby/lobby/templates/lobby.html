@@ -11,9 +11,9 @@
 
 {% block content %}
 
-<form name="test" method="post" action="input1.php">
-    <input type="button" value="Create lobby">
-</form>
+<a href="{% url 'createGame' %}">
+    <input type="button" value="Create game">
+</a>
 <p></p>
 
 <div style="display: grid; grid-template-columns: auto auto">
