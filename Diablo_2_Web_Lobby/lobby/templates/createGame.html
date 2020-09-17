@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
+{% endblock %}
+
+{% block content %}
+
+<div>Create game</div>
+<div align="left">
+    <a href="{% url 'lobby' %}">
+        <button style="padding: 10px 30px"> Back  </button>
+    </a>
+</div>
+<p></p>
+
+<form>
+    <h1><input type="text" size=40 placeholder="Game Name"/></h1>
+    <h1><input type="password" size=40 placeholder="Password"/></h1>
+    <h5>
+        Max count of Players
+        <select name="countOfPLayers" id="countOfPlayers">
+            <option value=1>1</option>
+            <option value=2>2</option>
+            <option value=3>3</option>
+            <option value=4>4</option>
+        </select>
+    </h5>
+    <h5>
+        Difficulty:
+        <input type="radio" name="difficulty" id="difficultyNormal" value="normal">
+        <label for="difficultyNormal"> Normal </label>
+        <input type="radio" name="difficulty" id="difficultyNightmare" value="nightmare">
+        <label for="difficultyNightmare"> Nightmare </label>
+        <input type="radio" name="difficulty" id="difficultyHell" value="hell">
+        <label for="difficultyHell"> Hell </label>
+    </h5>
+    <input type="submit" value="Create Game" style="padding: 10px 10px">
+</form>
+
+{% endblock %}

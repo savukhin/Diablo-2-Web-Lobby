@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <style>
+        {% block styles %} {% endblock %}
+    </style>
+
+    <title> Leviathan </title>
+</head>
+<body>
+<div>
+    <div class="row">
+      <div align="left">
+      <ul class="sidebar-nav">
+          {% if not request.user.is_authenticated %}
+          <li><a href="{% url 'index' %}">Home</a></li>
+          <li><a href="{% url 'sign in' %}">Sign In</a></li>
+          <li><a href="{% url 'sign up' %}">Sign Up</a></li>
+          <li><a href="{% url 'lobby' %}">Lobby</a></li>
+          {% else %}
+          <li><a href="{% url 'profile' %}">Profile</a></li>
+          <li><a href="{% url 'sign out' %}">Sign Out</a></li>
+          {% endif %}
+      </ul>
+      </div>
+      <div align="center">
+          {% block content %} {% endblock %}
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
