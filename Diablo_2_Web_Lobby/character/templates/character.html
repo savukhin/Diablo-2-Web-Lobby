@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="grid-container">
+    <div>
+        <div>
+            <h2> Character: </h2>
+            <p> Name: {{ character.name }} </p>
+            <p> Class: {{ character.characterClass }} </p>
+        <p> Owner: <a href="{% url 'profile' character.player.user.id %}"> {{ character.player.user.username }} </a> </p>
+        </div>
+    </div>
+    <div>
+        Some Character photo
+    </div>
+</div>
+
+{% endblock %}

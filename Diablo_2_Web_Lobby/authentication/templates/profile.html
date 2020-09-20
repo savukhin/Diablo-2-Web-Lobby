@@ -18,7 +18,9 @@
         <div>
             <h2> Characters: </h2>
             {% for character in characters %}
-            <p> {{ character.name }} </p>
+            <a href="{% url 'character armory' character.name %}">
+                <p> {{ character.name }} </p>
+            </a>
             {% endfor %}
         </div>
     </div>

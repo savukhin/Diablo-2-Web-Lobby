@@ -21,3 +21,7 @@ def createCharacter(request):
 
     return render(request, template_name='createCharacter.html')
 
+
+def showCharacter(request, name):
+    return render(request, template_name='character.html',
+                  context={'character': Character.objects.get(name=name)})
