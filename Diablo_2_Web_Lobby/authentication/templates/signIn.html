@@ -2,10 +2,15 @@
 
 {% block content %}
 
-<form name="test" method="post" action="input1.php">
-    <h1><input type="text" size=40 placeholder="Login"/></h1>
-    <h1><input type="password" size=40 placeholder="Password"/></h1>
-    <input type="submit" value="Sign In">
+<form method="post">
+    {% csrf_token %}
+    <h1><input name="username" type="text" size=40 placeholder="Login"/></h1>
+    <h1><input name="password" type="password" size=40 placeholder="Password"/></h1>
+    {% if not request.user.is_authenticated and request.method == "POST" %}
+        <div>Invalid login or password!</div>
+    {% endif %}
+
+    <button type="submit"> Sign In </button>
 </form>
 
 {% endblock %}
