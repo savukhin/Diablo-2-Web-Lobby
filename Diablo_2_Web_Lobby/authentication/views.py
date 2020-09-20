@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from authentication.models import CustomUser, PvpgnBnet
 from authentication.forms import FormReg
 from authentication.passhash import makeHash
+from django.contrib.auth.models import User
 
 # Create your views here.
 
@@ -50,5 +51,7 @@ def signOut(request):
     return redirect('/')
 
 #View for profile displaying
-def profile(request):
-    return render(request, template_name='profile.html')
+def profile(request, id):
+    djangoUser = User.objects.get(id=id)
+    return render(request, template_name='profile.html',
+                  context={'request': request,'profile': CustomUser.objects.get(user_id=djangoUser.id)})
