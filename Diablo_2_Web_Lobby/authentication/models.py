@@ -1,11 +1,45 @@
 from django.db import models
 from django.contrib.auth.models import User
+from authentication.passhash import makeHash
 
 # Create your models here.
 
+#Manager for PvPGN profile creation
+#It's necessary because PvPGN model is not Django created model
+class PvpgnBnetManager(models.Manager):
+    def createProfile(self, name, password, email, isAdmin='false'):
+        newID = PvpgnBnet.objects.count()
+        newProfile = self.create(uid=newID,
+            acct_username = name,
+            username = name,
+            acct_userid=newID,
+            acct_passhash1 = makeHash(password),
+            acct_email = email,
+            auth_admin = isAdmin,
+            auth_normallogin = "true",
+            auth_changepass = "true",
+            auth_changeprofile = "true",
+            auth_botlogin = "false",
+            auth_operator = "false",
+            new_at_team_flag = 0,
+            auth_lock = "false",
+            auth_locktime = 0,
+            auth_lockreason = None,
+            auth_mute = "false",
+            auth_mutetime = 0,
+            auth_mutereason = None,
+            auth_command_groups = 1,
+            acct_lastlogin_time = 0,
+            acct_lastlogin_owner = "Panky",
+            acct_lastlogin_clienttag = "D2XP",
+            acct_lastlogin_ip = "192.168.1.14",
+            acct_ctime = "0")
+        return newProfile
 
+
+#Model of PvPGN Profile (this table created by PvPGN Server so there is many PvPGN fields)
 class PvpgnBnet(models.Model):
-    uid = models.IntegerField(primary_key=True)
+    uid = models.IntegerField(primary_key=True, null=False, blank=False, editable=True)
     acct_username = models.CharField(max_length=32, blank=True, null=True)
     username = models.CharField(unique=True, max_length=32, blank=True, null=True)
     acct_userid = models.IntegerField(blank=True, null=True)
@@ -31,11 +65,14 @@ class PvpgnBnet(models.Model):
     acct_lastlogin_ip = models.CharField(max_length=16, blank=True, null=True)
     acct_ctime = models.CharField(max_length=128, blank=True, null=True)
 
+    objects = PvpgnBnetManager()
+
     class Meta:
         managed = False
         db_table = 'pvpgn_bnet'
 
 
+#Model of user on the site (it contains relation between Django user and PvPGN profile)
 class CustomUser(models.Model):
     user = models.OneToOneField(verbose_name="Реальный пользователь", to=User, on_delete=models.CASCADE,
                                 related_name="customUser")
