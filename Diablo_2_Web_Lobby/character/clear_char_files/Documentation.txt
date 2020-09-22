@@ -1,0 +1,13 @@
+charinfo:
+- Character name [64; 80)
+- Character user [80; 96)
+- Character class 188
+- - "Amazon" 0
+- - "Sorceress" 1
+- - "Necromancer" 2
+- - "Paladin" 3
+- - "Barbarian" 4
+- -  "Druid" 5
+- - "Assassin" 6
+
+charinfo:
