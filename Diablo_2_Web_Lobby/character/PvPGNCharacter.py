@@ -16,17 +16,18 @@ characterClassCodes = {'Amazon' : 0,
 
 
 def createCharInfo(player, name, characterClass):
-    #Final folder for charinfo file
+    #Final folder for charinf   o file
     folder = CHARINFO_FOLDER + "/" + player
 
     # q - byte array from clear charinfo
-    f = open("character/clear_char_files/charinfo", "rb")
+    s = "charinfo_" + characterClass
+    f = open("character/clear_char_files/" + s, "rb")
     q = f.read()
     f.close()
 
     w = []
     #Copying some bytes from q to w
-    for i in range(0, 64):
+    for i in range(0, 48):
         w.append(q[i])
 
     #Copy character name to w
@@ -46,17 +47,17 @@ def createCharInfo(player, name, characterClass):
             w.append(s[i])
 
     #Copying some bytes from q to w
-    for i in range(96, 188):
+    for i in range(80, len(q)):
         w.append(q[i])
 
     #Add info about character class
-    w.append(characterClassCodes[characterClass])
+    w[188] = characterClassCodes[characterClass]
 
-    #Copying some bytes from q to w
-    for i in range(189, len(q)):
-        w.append(q[i])
 
-    os.mkdir(folder)
+    try:
+        os.mkdir(folder)
+    except:
+        pass
     f = open(folder + "/" + name, "wb")
     f.write(bytearray(w))
     f.close()
@@ -100,7 +101,8 @@ def d2charsave_checksum(filename, offset=12):
 #Function to create charsave file
 def createCharSave(name, characterClass):
     #q - byte array from clear charsave
-    f = open("character/clear_char_files/charsave", "rb")
+    s = "charsave_" + characterClass
+    f = open("character/clear_char_files/" + s, "rb")
     q = f.read()
     f.close()
 
@@ -138,11 +140,11 @@ def createCharSave(name, characterClass):
     for i in range(41, len(q)):
         w.append(q[i])
 
-    f = open("result.d2s", "wb")
+    f = open(CHARSAVE_FOLDER + "/" + name, "wb")
     f.write(bytearray(w))
     f.close()
 
-    check = d2charsave_checksum("result.d2s")
+    check = d2charsave_checksum(CHARSAVE_FOLDER + "/" + name)
     temp = int(check).to_bytes(4, "little", signed=True)
     for i in range(12, 16):
         w[i] = temp[i - 12]
