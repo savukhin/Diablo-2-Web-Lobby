@@ -15,7 +15,7 @@
 <a href="{% url 'preLobby' %}">
     <button>Change Character</button>
 </a>
-<a href="{% url 'createGame' %}">
+<a href="{% url 'createGame' name=character.name %}">
     <button>Create game</button>
 </a>
 
