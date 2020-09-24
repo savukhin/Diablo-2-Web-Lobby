@@ -11,9 +11,14 @@
 
 {% block content %}
 
-<a href="{% url 'createGame' %}">
-    <input type="button" value="Create game">
+<p>Character is {{character.name}}</p>
+<a href="{% url 'preLobby' %}">
+    <button>Change Character</button>
 </a>
+<a href="{% url 'createGame' %}">
+    <button>Create game</button>
+</a>
+
 <p></p>
 
 <div style="display: grid; grid-template-columns: auto auto">
