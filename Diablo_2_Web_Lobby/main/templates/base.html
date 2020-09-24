@@ -19,7 +19,7 @@
           <li><a href="{% url 'sign in' %}">Sign In</a></li>
           <li><a href="{% url 'sign up' %}">Sign Up</a></li>
           {% else %}
-          <li><a href="{% url 'lobby' %}">Lobby</a></li>
+          <li><a href="{% url 'preLobby' %}">Lobby</a></li>
           <li><a href="{% url 'profile' request.user.id %}">Profile</a></li>
           <li><a href="{% url 'sign out' %}">Sign Out</a></li>
           {% endif %}
