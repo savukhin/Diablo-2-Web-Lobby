@@ -21,29 +21,37 @@
 
 <p></p>
 
-<div style="display: grid; grid-template-columns: auto auto">
-    <div style="background-color: #ff0000; border-style: solid;">
-        <h1>Games</h1>
-        <form name="test" method="post" action="input1.php">
-            <input type="button" value="Game 1">
-            <p></p>
+<div style="background-color: #ff0000; border-style: solid;">
+    <h1>Games</h1>
+    {% if games|length == 0 %}
+        <h3>Nobody playing on this server now. Create your game! Quicker!</h3>
+    {% else %}
+    <table border="1" width="100%" style="text-align: center">
+        <tr>
+            <th>Title</th>
+            <th>Password</th>
+            <th>Difficulty</th>
+            <th>Users</th>
+            <th>Connect</th>
+        </tr>
+        {% for game in games %}
+        <form method="post">
+        <tr>
+            <td> {{ game.title }} </td>
+            <td>
+                <input>
+            </td>
+            <td> {{ game.difficulty }} </td>
+            <td> {{ game.users }} </td>
+            <td>
+                <button> Connect! </button>
+            </td>
+        </tr>
         </form>
-        <form name="test" method="post" action="input1.php">
-            <input type="button" value="Game 2">
-            <p></p>
-        </form>
-    </div>
-    <div style="background-color: #ff0000; border-style: solid;">
-        <h1>Info</h1>
-        <h3>User: Username </h3>
-        <h3>IP: 47.69.228.1337 </h3>
-        <h3>Player list: </h3>
-        <div>
-            <h4>Player 1</h4>
-            <h4>Player 2</h4>
-            <h4>Player 3</h4>
-        </div>
-    </div>
+        {% endfor %}
+
+    </table>
+    {% endif %}
 </div>
 
 {% endblock %}
