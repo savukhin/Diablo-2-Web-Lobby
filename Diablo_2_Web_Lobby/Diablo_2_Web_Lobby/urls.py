@@ -22,4 +22,5 @@ urlpatterns = [
     path('', include('main.urls')),
     path('', include('authentication.urls')),
     path('', include('lobby.urls')),
+    path('', include('character.urls')),
 ]

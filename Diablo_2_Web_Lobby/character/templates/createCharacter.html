@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<form method="post">
+    {% csrf_token %}
+    <h1><input name="name" type="text" size=40 placeholder="Character name"/></h1>
+
+    <h5>
+        Class of Character
+        <input type="radio" name="characterClass" id="Amazon" value="Amazon">
+        <label for="Amazon"> Amazon </label>
+        <input type="radio" name="characterClass" id="Sorceress" value="Sorceress">
+        <label for="Sorceress"> Sorceress </label>
+        <input type="radio" name="characterClass" id="Necromancer" value="Necromancer">
+        <label for="Necromancer"> Necromancer </label>
+        <input type="radio" name="characterClass" id="Paladin" value="Paladin">
+        <label for="Paladin"> Paladin </label>
+        <input type="radio" name="characterClass" id="Barbarian" value="Barbarian">
+        <label for="Barbarian"> Barbarian </label>
+        <input type="radio" name="characterClass" id="Druid" value="Druid">
+        <label for="Druid"> Druid </label>
+        <input type="radio" name="characterClass" id="Assassin" value="Assassin">
+        <label for="Assassin"> Assassin </label>
+    </h5>
+
+    {% if form.errors and request.method == 'POST'%}
+    <p> {{ form.errors }} </p>
+    {% endif %}
+
+    <button type="submit"> Create </button>
+</form>
+
+{% endblock %}

@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from authentication.models import CustomUser, PvpgnBnet
 from authentication.forms import FormReg
-from authentication.passhash import makeHash
 from django.contrib.auth.models import User
+from character.models import Character
 
 # Create your views here.
 
@@ -50,8 +50,11 @@ def signOut(request):
     logout(request)
     return redirect('/')
 
+
 #View for profile displaying
 def profile(request, id):
     djangoUser = User.objects.get(id=id)
+    customUser = CustomUser.objects.get(user_id=djangoUser.id)
+    characters = Character.objects.filter(player_id=customUser.id)
     return render(request, template_name='profile.html',
-                  context={'request': request,'profile': CustomUser.objects.get(user_id=djangoUser.id)})
+                  context={'request': request,'profile': customUser, 'characters': characters})
