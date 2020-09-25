@@ -7,7 +7,7 @@ from lobby.D2GSConnetion import getGameList
 # Create your views here.
 
 #This is a prelobby where user choose character
-def prelobby(request):
+def preLobby(request):
     thisUesr = CustomUser.objects.get(user_id=request.user.id)
     characters = Character.objects.filter(player_id=thisUesr.id)
     return render(request, template_name='preLobby.html',
@@ -33,7 +33,15 @@ class Game:
         self.users = users
 
 
-def lobby(request):
+def lobby(request, name):
+    #User must enter to the lobby with his character
+    character = Character.objects.get(name=name)
+    thisUser = CustomUser.objects.get(user_id=request.user.id)
+    if isCharacterCorrect(thisUser, character) == False:  # If something wrong with this character
+        #The we render the prelobby page
+        return preLobby(request)
+
+
     #To see game list in terminal. There is array of splitted information about each game (array of arrays)
     rawGameList = getGameList()
     #There is something in format [['001', 'Www', '1', 'exp', 'sc', 'normal', 'ladder', '1', '10:42:35', 'N']]
@@ -56,7 +64,7 @@ def lobby(request):
         #Adding information about this game in list
         games.append(Game(title, password, difficulty, users))
 
-    return render(request, template_name='lobby.html', context={'games' : games})
+    return render(request, template_name='lobby.html', context={'character': character, 'games' : games})
 
 
 #View to page with game creating (character has already been chosen)
@@ -64,6 +72,6 @@ def createGame(request, name):
     character = Character.objects.get(name=name)
     thisUser = CustomUser.objects.get(user_id=request.user.id)
     if isCharacterCorrect(thisUser, character) == False:  # If something wrong with this character
-        return prelobby(request)
+        return preLobby(request)
 
     return render(request, template_name='createGame.html', context={'character' : character})

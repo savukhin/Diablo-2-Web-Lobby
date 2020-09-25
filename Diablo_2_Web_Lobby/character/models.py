@@ -5,7 +5,7 @@ from django.core.validators import RegexValidator
 # Create your models here.
 
 #Validator for charField to not contain figures
-nonFigureRegex = RegexValidator(r'^[a-zA-Z]*$', 'Only alphanumeric characters are allowed.')
+nonFigureRegex = RegexValidator(r'^[a-zA-Z]*$', 'Only alphabetic characters are allowed.')
 
 
 class Character(models.Model):
