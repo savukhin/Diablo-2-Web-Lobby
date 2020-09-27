@@ -1,0 +1,12 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\diablo2]
+@="URL:diablo2"
+"URL Protocol"="URL:diablo2"
+
+[HKEY_CLASSES_ROOT\diablo2\shell]
+
+[HKEY_CLASSES_ROOT\diablo2\shell\open]
+
+[HKEY_CLASSES_ROOT\diablo2\shell\open\command]
+@="\"D:\\games\\RPG\\Diablo 2 Lord of Destruction\\Diablo II.exe\" -- \"%1\""
