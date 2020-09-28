@@ -37,10 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'lobby',
     'main',
     'authentication',
-    'character'
+    'character',
 ]
 
 MIDDLEWARE = [
@@ -73,7 +74,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'Diablo_2_Web_Lobby.wsgi.application'
-
+ASGI_APPLICATION = 'Diablo_2_Web_Lobby.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('192.168.1.14', 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases

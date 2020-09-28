@@ -4,7 +4,7 @@
 
 .grid-container {
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: 35% auto;
 }
 
 {% endblock %}
@@ -21,37 +21,94 @@
 
 <p></p>
 
-<div style="background-color: #ff0000; border-style: solid;">
-    <h1>Games</h1>
-    {% if games|length == 0 %}
-        <h3>Nobody playing on this server now. Create your game! Quicker!</h3>
-    {% else %}
-    <table border="1" width="100%" style="text-align: center">
-        <tr>
-            <th>Title</th>
-            <th>Password</th>
-            <th>Difficulty</th>
-            <th>Users</th>
-            <th>Connect</th>
-        </tr>
-        {% for game in games %}
-        <form method="post">
-        <tr>
-            <td> {{ game.title }} </td>
-            <td>
-                <input>
-            </td>
-            <td> {{ game.difficulty }} </td>
-            <td> {{ game.users }} </td>
-            <td>
-                <button> Connect! </button>
-            </td>
-        </tr>
-        </form>
-        {% endfor %}
-
-    </table>
-    {% endif %}
+<div class="grid-container">
+    <div style="background-color: #ff0000; border-style: solid;">
+        <h1>Chat</h1>
+        <textarea id="chat-log" readonly rows=9 style="width:90%"></textarea>
+        <div style="display: grid; grid-template-columns: 75% auto;">
+            <input id="chat-message-input" type="text" placeholder="Message by {{character.player.user.username}}({{character.name}})">
+            <!--<button id="chat-message-submit" style="height:40px">Send</button> --->
+            <input id="chat-message-submit" type="button" value="Send" style="height:40px">
+        </div>
+    </div>
+    <div style="background-color: #ff0000; border-style: solid;">
+        <h1>Games</h1>
+        {% if games|length == 0 %}
+            <h3>Nobody playing on this server now. Create your game! Quicker!</h3>
+        {% else %}
+        <table border="1" width="100%" style="text-align: center">
+            <tr>
+                <th>Title</th>
+                <th>Password</th>
+                <th>Difficulty</th>
+                <th>Users</th>
+                <th>Connect</th>
+            </tr>
+            {% for game in games %}
+            <!--<form method="post">-->
+            <tr>
+                <td> {{ game.title }} </td>
+                <td>
+                    <input>
+                </td>
+                <td> {{ game.difficulty }} </td>
+                <td> {{ game.users }} </td>
+                <td>
+                    <button> Connect! </button>
+                </td>
+            </tr>
+            <!--</form>-->
+            {% endfor %}
+        </table>
+        {% endif %}
+    </div>
 </div>
+
+{% endblock %}
+
+{% block script %}
+
+{{ room_name|json_script:"room-name" }}
+
+<script type="text/javascript">
+    const roomName = JSON.parse(document.getElementById('room-name').textContent);
+
+    const chatSocket = new WebSocket(
+        'ws://'
+        + window.location.host
+        + '/ws/chat/'
+        + roomName
+        + '/'
+    );
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        document.querySelector('#chat-log').value += (data.author + '(' + data.character + '): ' + data.message + '\n');
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    document.querySelector('#chat-message-input').focus();
+    document.querySelector('#chat-message-input').onkeyup = function(e) {
+        if (e.keyCode === 13) {  // enter, return
+            document.querySelector('#chat-message-submit').click();
+        }
+    };
+
+    document.querySelector('#chat-message-submit').onclick = function(e) {
+        const messageInputDom = document.querySelector('#chat-message-input');
+        const message = messageInputDom.value;
+        const author = "{{character.player.user.username}}";
+        const character = "{{character.name}}";
+        chatSocket.send(JSON.stringify({
+            'author' : author,
+            'character' : character,
+            'message': message
+        }));
+        messageInputDom.value = '';
+    };
+</script>
 
 {% endblock %}
