@@ -64,7 +64,8 @@ def lobby(request, name):
         #Adding information about this game in list
         games.append(Game(title, password, difficulty, users))
 
-    return render(request, template_name='lobby.html', context={'character': character, 'games' : games})
+    return render(request, template_name='lobby.html', context={'character': character, 'games' : games,
+                                                                'room_name': 'default_room'})
 
 
 #View to page with game creating (character has already been chosen)
