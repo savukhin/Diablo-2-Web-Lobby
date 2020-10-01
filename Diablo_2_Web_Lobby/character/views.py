@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from character.forms import CharacterCreateForm
 from character.models import Character
 from authentication.models import CustomUser
+from django.http import HttpResponseRedirect
 from character.PvPGNCharacter import createPvPGNCharacter
-
 # Create your views here.
 
 
@@ -25,6 +26,21 @@ def createCharacter(request):
     return render(request, template_name='createCharacter.html')
 
 
+def getCharacter(name):
+    import urllib.request, json
+    fp = urllib.request.urlopen("http://127.0.0.1:8001/" + name)
+    mystr = (fp.read()).decode("utf-8")
+    fp.close()
+    if mystr[0] == 'E': #That means the word is Error (not a start of the json)
+        return "ERROR"
+    info = json.loads(mystr)
+    return info
+
+
 def showCharacter(request, name):
+    character = getCharacter(name)
+    if (character == "ERROR"):
+        return redirect(request.META.get('HTTP_REFERER'))
     return render(request, template_name='character.html',
-                  context={'character': Character.objects.get(name=name)})
+                  context={'owner': Character.objects.get(name=name).player,
+                           'character': character})

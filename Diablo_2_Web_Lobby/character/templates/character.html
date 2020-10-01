@@ -12,18 +12,64 @@
 
 {% block content %}
 
+
+<div style="line-height:20%">
+    <h2> {{ character.header.name }} </h2>
+    <h6>{{ character.header.class }}({{ character.attributes.level }})</h6>
+    <p> Owner: <a href="{% url 'profile' owner.user.id %}"> {{ owner.user.username }} </a> </p>
+</div>
+
 <div class="grid-container">
     <div>
-        <div>
-            <h2> Character: </h2>
-            <p> Name: {{ character.name }} </p>
-            <p> Class: {{ character.characterClass }} </p>
-        <p> Owner: <a href="{% url 'profile' character.player.user.id %}"> {{ character.player.user.username }} </a> </p>
+        <div style="line-height: 20%">
+            <h2> EQUIPMENT </h2>
+            {% for item in character.items %}
+                {% if item.equipped_id %}
+                    <p> {{ item.type_name }} </p>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <br>
+        <div style="line-height: 20%">
+            <h2> ATTRIBUTES </h2>
+            <p> Life: {{ character.attributes.current_hp }}/{{ character.attributes.max_hp }} </p>
+            <p> Mana:{{ character.attributes.current_mana }}/{{ character.attributes.max_mana }}</p>
+        </div>
+        <br>
+        <div style="line-height: 20%">
+            <h4> CORE ATTRIBUTES </h4>
+            <p> Strength: {{ character.attributes.strength }} </p>
+            <p> Energy: {{ character.attributes.energy }} </p>
+            <p> Dexterity: {{ character.attributes.dexterity }} </p>
+            <p> Vitality: {{ character.attributes.vitality }} </p>
+        </div>
+        <br>
+        <div style="line-height: 20%">
+            <h4> OTHER ATTRIBUTES </h4>
+            <p> Experience: {{ character.attributes.experience }}</p>
+            <p> Gold: {{ character.attributes.gold }} </p>
+            <p> Stashed Gold: {{ character.attributes.stashed_gold }} </p>
+            <p> Experience: {{ character.attributes.experience }}</p>
+        </div>
+        <br>
+        <div style="line-height: 20%">
+            <h2> INVENTORY </h2>
+            {% for item in character.items %}
+                {% if not item.equipped_id %}
+                    <p> {{ item.type_name }} </p>
+                {% endif %}
+            {% endfor %}
         </div>
     </div>
     <div>
-        Some Character photo
+        <div style="line-height: 20%">
+            <h2> Skills </h2>
+            {% for skill in character.skills %}
+                <p> {{skill.name}} => {{skill.points}} </p>
+            {% endfor %}
+        </div>
     </div>
 </div>
+
 
 {% endblock %}

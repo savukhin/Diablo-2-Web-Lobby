@@ -1,7 +1,7 @@
 import numpy as np
 import os
 
-#folder to PvPGN folder with files which contains info that is not in sql
+# Directory to PvPGN folder with files which contains info that is not in sql
 VAR_FOLDER = "D:/PvPGN/Magic_Builder/release/var/"
 CHARSAVE_FOLDER = VAR_FOLDER + "charsave"
 CHARINFO_FOLDER = VAR_FOLDER + "charinfo"
