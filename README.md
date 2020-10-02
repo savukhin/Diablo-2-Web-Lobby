@@ -1,5 +1,13 @@
 # Diablo-2-Web-Lobby
 
+## Commands
+- docker run -p 6379:6379 -d redis:5
+    - To run docker on port 6379
+- go run main.go 
+    - To run Armory server (in \Armory folder)
+- Set-ExecutionPolicy Unrestricted -Force
+    - To enter the virtualenv (VSCode)
+
 ## Packages:
 - django
 - channels
