@@ -1,11 +1,133 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block styles %}
 
 .grid-container {
     display: grid;
     grid-template-columns: auto auto;
 }
+
+
+.equipment-helmet {
+    background: url({% static 'Armory/EmptyHelmetSlot.png' %});
+    display: flex;
+    position: absolute;
+    top: 270px;
+    left: 265px;
+    width: 65px;
+    height: 62px;
+    justify-content: center;
+    align-items: center;
+}
+
+.equipment-amulet {
+    background: url({% static 'Armory/EmptyAmuletSlot.png' %});
+    display: flex;
+    position: absolute;
+    top: 298px;
+    left: 340px;
+    width: 35px;
+    height: 35px;
+    justify-content: center;
+    align-items: center;
+}
+
+.equipment-weapon-left {
+    background: url({% static 'Armory/EmptyWeaponSlot.png' %});
+    display: flex;
+    position: absolute;
+    top: 320px;
+    left: 150px;
+    width: 65px;
+    height: 120px;
+    justify-content: center;
+    align-items: center;
+}
+
+.equipment-armor {
+    background: url({% static 'Armory/EmptyArmorSlot.png' %});
+    display: flex;
+    position: absolute;
+    top: 346px;
+    left: 265px;
+    width: 65px;
+    height: 94px;
+    justify-content: center;
+    align-items: center;
+}
+
+.equipment-weapon-right {
+    background: url({% static 'Armory/EmptyWeaponSlot.png' %});
+    display: flex;
+    position: absolute;
+    top: 320px;
+    left: 380px;
+    width: 65px;
+    height: 120px;
+    justify-content: center;
+    align-items: center;
+}
+
+.equipment-gloves {
+    background: url({% static 'Armory/EmptyGlovesSlot.png' %});
+    display: flex;
+    position: absolute;
+    top: 450px;
+    left: 150px;
+    width: 65px;
+    height: 65px;
+    justify-content: center;
+    align-items: center;
+}
+
+.equipment-ring-left {
+    background: url({% static 'Armory/EmptyRingSlot.png' %});
+    display: flex;
+    position: absolute;
+    top: 450px;
+    left: 220px;
+    width: 35px;
+    height: 35px;
+    justify-content: center;
+    align-items: center;
+}
+
+.equipment-belt {
+    background: url({% static 'Armory/EmptyBeltSlot.png' %});
+    display: flex;
+    position: absolute;
+    top: 450px;
+    left: 265px;
+    width: 65px;
+    height: 35px;
+    justify-content: center;
+    align-items: center;
+}
+
+.equipment-ring-right {
+    background: url({% static 'Armory/EmptyRingSlot.png' %});
+    display: flex;
+    position: absolute;
+    top: 450px;
+    left: 340px;
+    width: 35px;
+    height: 35px;
+    justify-content: center;
+    align-items: center;
+}
+
+.equipment-boot {
+    background: url({% static 'Armory/EmptyBootSlot.png' %});
+    display: flex;
+    position: absolute;
+    top: 450px;
+    left: 380px;
+    width: 65px;
+    height: 65px;
+    justify-content: center;
+    align-items: center;
+}
+
 
 {% endblock %}
 
@@ -21,13 +143,87 @@
 
 <div class="grid-container">
     <div>
-        <div style="line-height: 20%">
-            <h2> EQUIPMENT </h2>
-            {% for item in character.items %}
-                {% if item.equipped_id %}
-                    <p> {{ item.type_name }} </p>
-                {% endif %}
-            {% endfor %}
+        <div style="line-height: 20%; height: 300px;">
+            <h2>  <button onclick="swapWeapon()"> SWAP </button> EQUIPMENT </h2>
+            <div class="equipment-helmet">
+                {% for item in character.items %}
+                    {% if item.equipped_id and item.equipped_id == 1 %}
+                        {% with "Armory/"|add:item.type|add:".gif" as itemPath %}
+                            <img src="{% static itemPath %}">
+                        {% endwith %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="equipment-amulet">
+                {% for item in character.items %}
+                    {% if item.equipped_id and item.equipped_id == 2 %}
+                        {% with "Armory/"|add:item.type|add:".gif" as itemPath %}
+                            <img src="{% static itemPath %}">
+                        {% endwith %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="equipment-weapon-left">
+                <img id="left-weapon">
+            </div>
+            <div class="equipment-armor">
+                {% for item in character.items %}
+                    {% if item.equipped_id and item.equipped_id == 3 %}
+                        {% with "Armory/"|add:item.type|add:".gif" as itemPath %}
+                            <img src="{% static itemPath %}">
+                        {% endwith %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="equipment-weapon-right">
+                <img id="right-weapon">
+            </div>
+            <div class="equipment-gloves">
+                {% for item in character.items %}
+                    {% if item.equipped_id and item.equipped_id == 10 %}
+                        {% with "Armory/"|add:item.type|add:".gif" as itemPath %}
+                            <img src="{% static itemPath %}">
+                        {% endwith %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="equipment-ring-left">
+                {% for item in character.items %}
+                    {% if item.equipped_id and item.equipped_id == 6 %}
+                        {% with "Armory/"|add:item.type|add:".gif" as itemPath %}
+                            <img src="{% static itemPath %}">
+                        {% endwith %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="equipment-belt">
+                {% for item in character.items %}
+                    {% if item.equipped_id and item.equipped_id == 8 %}
+                        {% with "Armory/"|add:item.type|add:".gif" as itemPath %}
+                            <img src="{% static itemPath %}">
+                        {% endwith %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="equipment-ring-right">
+                {% for item in character.items %}
+                    {% if item.equipped_id and item.equipped_id == 7 %}
+                        {% with "Armory/"|add:item.type|add:".gif" as itemPath %}
+                            <img src="{% static itemPath %}">
+                        {% endwith %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="equipment-boot">
+                {% for item in character.items %}
+                    {% if item.equipped_id and item.equipped_id == 9 %}
+                        {% with "Armory/"|add:item.type|add:".gif" as itemPath %}
+                            <img src="{% static itemPath %}">
+                        {% endwith %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+
         </div>
         <br>
         <div style="line-height: 20%">
@@ -72,4 +268,52 @@
 </div>
 
 
+{% endblock %}
+
+{% block script %}
+<script>
+var kit = 0;
+
+document.addEventListener("DOMContentLoaded", () => {
+    swapWeapon();
+});
+
+function swapWeapon() {
+    var left_weapon, right_weapon;
+    left_weapon = document.getElementById("left-weapon");
+    right_weapon = document.getElementById("right-weapon");
+    left_weapon.src = "";
+    right_weapon.src = "";
+    if (kit == 1) {
+        kit = 2;
+        {% for item in character.items %}
+            {% if item.equipped_id and item.equipped_id == 11 %}
+                {% with "Armory/"|add:item.type|add:".gif" as itemPath %}
+                    left_weapon.src="{% static itemPath %}";
+                {% endwith %}
+            {% endif %}
+            {% if item.equipped_id and item.equipped_id == 12 %}
+                {% with "Armory/"|add:item.type|add:".gif" as itemPath %}
+                    right_weapon.src="{% static itemPath %}";
+                {% endwith %}
+            {% endif %}
+        {% endfor %}
+    } else {
+        kit = 1;
+        {% for item in character.items %}
+            {% if item.equipped_id and item.equipped_id == 4 %}
+                {% with "Armory/"|add:item.type|add:".gif" as itemPath %}
+                    left_weapon.src="{% static itemPath %}";
+                {% endwith %}
+            {% endif %}
+            {% if item.equipped_id and item.equipped_id == 5 %}
+                {% with "Armory/"|add:item.type|add:".gif" as itemPath %}
+                    right_weapon.src="{% static itemPath %}"
+                {% endwith %}
+            {% endif %}
+        {% endfor %}
+    }
+}
+
+</script>
 {% endblock %}
