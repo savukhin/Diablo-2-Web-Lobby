@@ -5,6 +5,7 @@ from character.models import Character
 from authentication.models import CustomUser
 from django.http import HttpResponseRedirect
 from character.PvPGNCharacter import createPvPGNCharacter
+import json
 # Create your views here.
 
 
@@ -41,6 +42,8 @@ def showCharacter(request, name):
     character = getCharacter(name)
     if (character == "ERROR"):
         return redirect(request.META.get('HTTP_REFERER'))
+
     return render(request, template_name='character.html',
                   context={'owner': Character.objects.get(name=name).player,
-                           'character': character})
+                           'character': character,
+                           'character_dumps': json.dumps(character)})

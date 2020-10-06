@@ -8,6 +8,16 @@
 }
 
 
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #fff1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+
 .equipment-helmet {
     background: url({% static 'Armory/EmptyHelmetSlot.png' %});
     display: flex;
@@ -43,6 +53,8 @@
     justify-content: center;
     align-items: center;
 }
+
+.equipment-weapon-left:hover .dropdown-content {display: block;}
 
 .equipment-armor {
     background: url({% static 'Armory/EmptyArmorSlot.png' %});
@@ -116,7 +128,7 @@
     align-items: center;
 }
 
-.equipment-boot {
+.equipment-boots {
     background: url({% static 'Armory/EmptyBootSlot.png' %});
     display: flex;
     position: absolute;
@@ -145,85 +157,26 @@
     <div>
         <div style="line-height: 20%; height: 300px;">
             <h2>  <button onclick="swapWeapon()"> SWAP </button> EQUIPMENT </h2>
-            <div class="equipment-helmet">
-                {% for item in character.items %}
-                    {% if item.equipped_id and item.equipped_id == 1 %}
-                        {% with "https://armory.slashdiablo.net/assets/items/"|add:item.type|add:".png" as itemPath %}
-                            <img src="{{ itemPath }}">
-                        {% endwith %}
-                    {% endif %}
-                {% endfor %}
+            <div id="helmet_container" class="equipment-helmet" onmouseenter="handler(event)" onmouseleave="handler(event)"></div>
+            <div id="amulet_container" class="equipment-amulet" onmouseenter="handler(event)" onmouseleave="handler(event)"></div>
+            <div class="equipment-weapon-left" onmouseenter="handler(event)" onmouseleave="handler(event)">
+                <img id="left-weapon" src="">
+                <!--<div class="dropdown-content">
+                    <p> </p>
+                    <p> </p>
+                    <p> </p>
+                </div>-->
             </div>
-            <div class="equipment-amulet">
-                {% for item in character.items %}
-                    {% if item.equipped_id and item.equipped_id == 2 %}
-                        {% with "https://armory.slashdiablo.net/assets/items/"|add:item.type|add:".png" as itemPath %}
-                            <img src="{{ itemPath }}">
-                        {% endwith %}
-                    {% endif %}
-                {% endfor %}
+            <div id="armor_container" class="equipment-armor" onmouseenter="handler(event)" onmouseleave="handler(event)"></div>
+            <div class="equipment-weapon-right" onmouseenter="handler(event)" onmouseleave="handler(event)">
+                <img id="right-weapon" src="">
             </div>
-            <div class="equipment-weapon-left">
-                <img id="left-weapon">
-            </div>
-            <div class="equipment-armor">
-                {% for item in character.items %}
-                    {% if item.equipped_id and item.equipped_id == 3 %}
-                        {% with "https://armory.slashdiablo.net/assets/items/"|add:item.type|add:".png" as itemPath %}
-                            <img src="{{ itemPath }}">
-                        {% endwith %}
-                    {% endif %}
-                {% endfor %}
-            </div>
-            <div class="equipment-weapon-right">
-                <img id="right-weapon">
-            </div>
-            <div class="equipment-gloves">
-                {% for item in character.items %}
-                    {% if item.equipped_id and item.equipped_id == 10 %}
-                        {% with "https://armory.slashdiablo.net/assets/items/"|add:item.type|add:".png" as itemPath %}
-                            <img src="{{ itemPath }}">
-                        {% endwith %}
-                    {% endif %}
-                {% endfor %}
-            </div>
-            <div class="equipment-ring-left">
-                {% for item in character.items %}
-                    {% if item.equipped_id and item.equipped_id == 6 %}
-                        {% with "https://armory.slashdiablo.net/assets/items/"|add:item.type|add:".png" as itemPath %}
-                            <img src="{{ itemPath }}">
-                        {% endwith %}
-                    {% endif %}
-                {% endfor %}
-            </div>
-            <div class="equipment-belt">
-                {% for item in character.items %}
-                    {% if item.equipped_id and item.equipped_id == 8 %}
-                        {% with "https://armory.slashdiablo.net/assets/items/"|add:item.type|add:".png" as itemPath %}
-                            <img src="{{ itemPath }}">
-                        {% endwith %}
-                    {% endif %}
-                {% endfor %}
-            </div>
-            <div class="equipment-ring-right">
-                {% for item in character.items %}
-                    {% if item.equipped_id and item.equipped_id == 7 %}
-                        {% with "https://armory.slashdiablo.net/assets/items/"|add:item.type|add:".png" as itemPath %}
-                            <img src="{{ itemPath }}">
-                        {% endwith %}
-                    {% endif %}
-                {% endfor %}
-            </div>
-            <div class="equipment-boot">
-                {% for item in character.items %}
-                    {% if item.equipped_id and item.equipped_id == 9 %}
-                        {% with "https://armory.slashdiablo.net/assets/items/"|add:item.type|add:".png" as itemPath %}
-                            <img src="{{ itemPath }}">
-                        {% endwith %}
-                    {% endif %}
-                {% endfor %}
-            </div>
-
+            <div id="gloves_container" class="equipment-gloves" onmouseenter="handler(event)" onmouseleave="handler(event)"></div>
+            <div id="ring_left_container" class="equipment-ring-left" onmouseenter="handler(event)" onmouseleave="handler(event)"></div>
+            <div id="belt_container" class="equipment-belt" onmouseenter="handler(event)" onmouseleave="handler(event)"></div>
+            <div id="ring_right_container" class="equipment-ring-right" onmouseenter="handler(event)" onmouseleave="handler(event)"></div>
+            <div id="boots_container" class="equipment-boots" onmouseenter="handler(event)" onmouseleave="handler(event)"></div>
+            <div id="statsBox" style="display: none; position: absolute; left: 0px; background:#aaaaff">  </div>
         </div>
         <br>
         <div style="line-height: 20%">
@@ -273,10 +226,98 @@
 {% block script %}
 <script>
 var kit = 0;
+var stats = {}
+var statsDiv = document.getElementById("statsBox");
 
 document.addEventListener("DOMContentLoaded", () => {
-    swapWeapon();
+    loadEquip();
 });
+
+
+function handler(event) {
+    function str(el) {
+        if (!el) return "null"
+        return el.className || el.tagName;
+    }
+
+    if (event.type == 'mouseenter' && stats[event.target.className]) {
+        statsDiv.style.display = 'block';
+        var data = stats[event.target.className];
+        if (event.target.className == 'equipment-weapon-left' && kit == 2)
+            data = stats['equipment-weapon-left-2'];
+        else if (event.target.className == 'equipment-weapon-right' && kit == 2)
+            data = stats['equipment-weapon-right-2'];
+
+        statsDiv.innerHTML = ""
+        if (data.runeword_name)
+            statsDiv.innerHTML += data.runeword_name
+        statsDiv.innerHTML += "<p>" + data.type_name + "</p>";
+        statsDiv.innerHTML += "<p> Durability:" + data.current_durability + "/" + data.max_durability + "</p>";
+        if (data.defense_rating)
+            statsDiv.innerHTML += "<p> Defense: " + data.defense_rating + "</p>";
+        if (data.base_damage) {
+            if (data.twohand_min)
+                statsDiv.innerHTML += "<p> Two-hand damage " + data.base_damage.twohand_min + " To " + data.base_damage.twohand_max + "</p>";
+            else
+                statsDiv.innerHTML += "<p> One-hand damage " + data.base_damage.min + " To " + data.base_damage.max + "</p>";
+        }
+        if (data.set_attributes) {
+            for (i in data.set_attributes) {
+
+            }
+        }
+    }
+
+    if (event.type == 'mouseleave') {
+        statsDiv.style.display = 'none';
+        statsDiv.innerHTML = "";
+    }
+}
+
+
+function loadEquip() {
+    var equipmentIdToClassDict = {
+        '1':  'equipment-helmet',
+        '2':  'equipment-amulet',
+        '3':  'equipment-armor',
+        '4':  'equipment-weapon-left',
+        '5':  'equipment-weapon-right',
+        '6':  'equipment-ring-left',
+        '7':  'equipment-ring-right',
+        '8':  'equipment-belt',
+        '9':  'equipment-boots',
+        '10':  'equipment-gloves',
+        '11': 'equipment-weapon-left-2',
+        '12': 'equipment-weapon-right-2'
+    }
+
+    var character_json = {{ character_dumps|safe }}
+
+    for (i in character_json.items) {
+        var item = character_json.items[i]
+        if (item.equipped_id != null) {
+            stats[equipmentIdToClassDict[item.equipped_id]] = item
+        }
+    }
+
+    {% for item in character.items %}
+        {% if item.equipped_id %}
+
+            itemDiv = document.getElementsByClassName(equipmentIdToClassDict["{{ item.equipped_id }}"])[0];
+
+            {% if item.equipped_id != 4 and item.equipped_id != 5 and item.equipped_id != 11 and item.equipped_id != 12 %}
+                {% with "https://armory.slashdiablo.net/assets/items/"|add:item.type|add:".png" as itemPath %}
+                    var newImg = document.createElement("img");
+                    newImg.src = "{{ itemPath }}";
+                {% endwith %}
+
+                itemDiv.prepend(newImg);
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
+    swapWeapon();
+}
 
 function swapWeapon() {
     var left_weapon, right_weapon;
