@@ -78,4 +78,4 @@ class CustomUser(models.Model):
                                 related_name="customUser")
     pvpgn_user = models.OneToOneField(verbose_name="Пользователь PvPGN", to=PvpgnBnet, on_delete=models.CASCADE,
                                       related_name="customUser")
-
+    photo = models.ImageField(verbose_name="Аватар пользователя", upload_to='Avatars', default='Avatars/blankAvatar.png')

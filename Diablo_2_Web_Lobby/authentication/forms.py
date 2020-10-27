@@ -9,3 +9,7 @@ class FormReg(UserCreationForm):
     class Meta:
         model = User
         fields = ['email', 'username', 'password1', 'password2']
+
+
+class ChangeAvatarForm(forms.Form):
+    photo = forms.ImageField()

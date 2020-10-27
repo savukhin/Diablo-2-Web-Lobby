@@ -4,6 +4,7 @@ from authentication.models import CustomUser, PvpgnBnet
 from authentication.forms import FormReg
 from django.contrib.auth.models import User
 from character.models import Character
+from authentication.forms import ChangeAvatarForm
 
 # Create your views here.
 
@@ -56,5 +57,14 @@ def profile(request, id):
     djangoUser = User.objects.get(id=id)
     customUser = CustomUser.objects.get(user_id=djangoUser.id)
     characters = Character.objects.filter(player_id=customUser.id)
+    if request.method == "POST":
+        form = ChangeAvatarForm(request.POST, request.FILES)
+        if form.is_valid():
+            img = form.cleaned_data.get("photo")
+            customUser.photo = img
+            customUser.save()
+            return redirect('/profile/' + str(id))
+
     return render(request, template_name='profile.html',
-                  context={'request': request,'profile': customUser, 'characters': characters})
+                  context={'request': request,'profile': customUser, 'characters': characters,
+                           'form': ChangeAvatarForm()})

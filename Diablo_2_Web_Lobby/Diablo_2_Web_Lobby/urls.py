@@ -23,4 +23,5 @@ urlpatterns = [
     path('', include('authentication.urls')),
     path('', include('lobby.urls')),
     path('', include('character.urls')),
+    path('', include('dialogues.urls')),
 ]
