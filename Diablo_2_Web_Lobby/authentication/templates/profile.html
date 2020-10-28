@@ -17,13 +17,18 @@
     <div>
         <div>
             <img style="object-fit: cover; width: 300px; height: 300px;" src="{{ profile.photo.url|file_exists }}">
+
+            {% if request.user == profile.user %}
             <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
                 <!--{{ form.as_p }}-->
                 {{ form.photo }}
                 <input type="submit" value="Change photo">
-
             </form>
+            {% else %}
+            <br>
+                <a href="{% url 'dialogue' profile.user.id %}"><button>Write message</button></a>
+            {% endif %}
         </div>
     </div>
     <div>

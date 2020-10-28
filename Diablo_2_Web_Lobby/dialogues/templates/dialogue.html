@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+
+.message {
+    overflow-wrap: break-word;
+    display:grid;
+    grid-template-columns: 100px 400px;
+    align-items:center;
+    width: 500px;
+    border: solid #aa0000;
+    padding: 0px 10px;
+}
+
+{% endblock %}
+
+{% load poll_extras %}
+
+{% block content %}
+
+<h1>{{ subject.user.username }}</h1>
+
+{% for message in messages %}
+<div class="message">
+    <div style=" float: left; top:50%">
+        <img style="object-fit: cover; width: 100px; height: 100px; border-radius: 50%" src="{{ message.Author.photo.url|file_exists }}">
+    </div>
+    <div style="float: left; padding: 0px 20px; transform: translate(0, -10%);">
+        <h2 align="left">{{ message.Author.user.username }} </h2>
+        <p align="left">{{ message.text }}</p>
+        <h6 align="left">{{ message.date|date:"c" }} </h6>
+    </div>
+</div>
+{% endfor %}
+
+
+<form method="post">
+    {% csrf_token %}
+    <div style="width:500px; padding:10px; display: grid; grid-template-columns: 75% auto;">
+        <input name="text" id="chat-message-input" type="text" placeholder="Type a message...">
+        <input id="chat-message-submit" type="submit" value="Send" style="height:40px">
+    </div>
+</form>
+{% endblock %}
