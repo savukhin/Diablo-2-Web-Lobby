@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+
+.message {
+    overflow-wrap: break-word;
+    display:grid;
+    grid-template-columns: 100px 400px;
+    align-items:center;
+    width: 500px;
+    border: solid #aa0000;
+    padding: 0px 10px;
+}
+
+.message a {
+    text-decoration: none;
+    color: #000000
+}
+
+{% endblock %}
+
+{% load poll_extras %}
+
+{% block content %}
+
+<a style="text-decoration: none; color: #000000" href="{% url 'profile' subject.user.id %}"><h1>{{ subject.user.username }}</h1></a>
+
+<div id="main">
+    {% for message in messages %}
+    <div class="message">
+        <div style=" float: left; top:50%">
+            <a href="{% url 'profile' message.Author.user.id %}"><img style="object-fit: cover; width: 100px; height: 100px; border-radius: 50%" src="{{ message.Author.photo.url|file_exists }}"></a>
+        </div>
+        <div style="float: left; padding: 0px 20px; transform: translate(0, -10%);">
+            <a href="{% url 'profile' message.Author.user.id %}"><h2 align="left">{{ message.Author.user.username }} </h2></a>
+            <p align="left">{{ message.text }}</p>
+            <h6 align="left">{{ message.date|date:"G:i" }} </h6>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!--
+<form method="post">
+    {% csrf_token %}-->
+    <div style="width:500px; padding:10px; display: grid; grid-template-columns: 75% auto;">
+
+        <input id="message-input" type="text" placeholder="Type a message...">
+        <!--<input id="chat-message-submit" type="submit" value="Send" style="height:40px">-->
+        <input id="message-submit" type="button" value="Send" style="height:40px">
+    </div>
+<!--</form>-->
+{% endblock %}
+
+{% block script %}
+<script>
+    const roomName = "{{ room_name }}";
+    //const roomName = 10;
+
+    const chatSocket = new WebSocket(
+        'ws://'
+        + window.location.host
+        + '/ws/chat/'
+        + roomName
+        + '/'
+    );
+
+    function messageHTMLGenerator(author, text, authorURL, photo, date="Nothing") {
+        var datetime = new Date(date)
+        s = '<div class="message">';
+        // Photo
+        s = s + '<div style=" float: left; top:50%"> <a href="' + authorURL + '"><img style="object-fit: cover; width: 100px; height: 100px; border-radius: 50%" src="' + photo + '"></a> </div>';
+        // Author
+        s = s + '<div style="float: left; padding: 0px 20px; transform: translate(0, -10%);"> <a href="' + authorURL + '"><h2 align="left">' + author + '</h2></a>';
+        // Text
+        s = s + '<p align="left">' + text + '</p>';
+        // Date
+        s = s + '<h6 align="left">' + datetime.getHours() + ':';
+        // Minutes
+        if (datetime.getMinutes() < 10)
+            s = s + '0';
+        s = s + datetime.getMinutes() + '</h6> </div>';
+        // Closing external div
+        s = s + '</div>';
+        var externalDiv = document.createElement('div');
+        externalDiv.innerHTML = s;
+        externalDiv.class="message";
+        return externalDiv;
+    };
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        var s = messageHTMLGenerator(data.author, data.message, data.authorURL, data.photo, data.date);
+        main.append(s);
+
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    document.querySelector('#message-input').focus();
+    document.querySelector('#message-input').onkeyup = function(e) {
+        if (e.keyCode === 13) {
+            document.querySelector('#message-submit').click();
+        }
+    };
+
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    document.querySelector('#message-submit').onclick = function(e) {
+        const messageInputDom = document.querySelector('#message-input');
+        const message = messageInputDom.value;
+        const author = "{{ request.user.username }}";
+
+        chatSocket.send(JSON.stringify({
+            'author' : author,
+            'message': message,
+            'authorURL' : '{% url 'profile' request.user.id %}',
+            'photo' : '{{ user.photo.url|file_exists }}',
+            'date' : Date(),
+        }));
+        messageInputDom.value = '';
+
+        $.ajax({
+            url: "{% url 'sendMessage' %}",
+            type: 'post', // This is the default though, you don't actually need to always mention it
+            data: {
+                'dialogue_id' : roomName,
+                'author_id' : '{{ request.user.id }}',
+                'message' : message,
+                'csrfmiddlewaretoken': getCookie('csrftoken')
+            },
+
+            failure: function(data) {
+                alert('Got an error dude');
+            }
+        });
+    };
+</script>
+{% endblock %}

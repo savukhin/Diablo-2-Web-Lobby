@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from dialogues.models import Dialogue, Message
 from authentication.models import CustomUser
-
+from django.http import HttpResponse
 # Create your views here.
 
 #Struct for displaying on page
@@ -43,23 +43,31 @@ def dialogue(request, id):
     except:
         currentDialogue = None
 
+    if currentDialogue == None:
+        newDialogue = Dialogue()
+        newDialogue.save()
+        newDialogue.users.add(thisCustomUser.id)
+        newDialogue.users.add(otherCustomUser.id)
+        currentDialogue = newDialogue
+
     try:
         messagesInDialogue = Message.objects.filter(dialogue_id=currentDialogue.id)
     except:
         messagesInDialogue = None
 
-    if request.method == "POST":
-        if currentDialogue == None:
-            newDialogue = Dialogue()
-            newDialogue.save()
-            newDialogue.users.add(thisCustomUser.id)
-            newDialogue.users.add(otherCustomUser.id)
-            currentDialogue = newDialogue
-        newMessage = Message(Author=thisCustomUser, text=request.POST['text'], dialogue=currentDialogue)
-        newMessage.save()
-        return redirect('/dialogue/subj=' + str(id))
-
-    return render(request, template_name='dialogue.html',
+    return render(request, template_name='chat.html',
                   context={'user': CustomUser.objects.get(user_id=request.user.id),
                            'subject': CustomUser.objects.get(user_id=id),
-                           'messages': messagesInDialogue})
+                           'messages': messagesInDialogue,
+                           'room_name': currentDialogue.id})
+
+
+def sendMessage(request):
+    dialogue_id = request.POST['dialogue_id']
+    author_id = request.POST['author_id']
+    message = request.POST['message']
+    currentDialogue = Dialogue.objects.get(id=dialogue_id)
+    thisCustomUser = CustomUser.objects.get(user_id=author_id)
+    newMessage = Message(Author=thisCustomUser, text=message, dialogue=currentDialogue)
+    newMessage.save()
+    return HttpResponse("OK")

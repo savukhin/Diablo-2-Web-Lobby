@@ -23,7 +23,13 @@
 
 <div class="grid-container">
     <div style="background-color: #ff0000; border-style: solid;">
-
+        <h1>Chat</h1>
+        <textarea id="chat-log" readonly rows=9 style="width:90%"></textarea>
+        <div style="display: grid; grid-template-columns: 75% auto;">
+            <input id="chat-message-input" type="text" placeholder="Message by {{character.player.user.username}}({{character.name}})">
+            <!--<button id="chat-message-submit" style="height:40px">Send</button> --->
+            <input id="chat-message-submit" type="button" value="Send" style="height:40px">
+        </div>
     </div>
     <div style="background-color: #ff0000; border-style: solid;">
         <h1>Games</h1>
@@ -92,6 +98,7 @@
     };
 
     document.querySelector('#chat-message-submit').onclick = function(e) {
+        prompt("0");
         const messageInputDom = document.querySelector('#chat-message-input');
         const message = messageInputDom.value;
         const author = "{{character.player.user.username}}";

@@ -19,7 +19,7 @@
 
 <h1>Messages</h1>
 {% for dialogue in dialogues %}
-<a href="{% url 'dialogue' dialogue.id%}">
+<a style="text-decoration: none; color: #000000;"  href="{% url 'dialogue' dialogue.id%}">
     <div class="dialogue">
         <div style=" float: left; top:50%">
             <img style="object-fit: cover; width: 100px; height: 100px; border-radius: 50%" src="{{ dialogue.opponent.photo.url|file_exists }}">
