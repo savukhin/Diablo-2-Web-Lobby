@@ -2,11 +2,6 @@
 {% load static %}
 {% block styles %}
 
-.grid-container {
-    display: grid;
-    grid-template-columns: auto auto;
-}
-
 
 .dropdown-content {
     display: none;
@@ -22,8 +17,8 @@
     background: url({% static 'Armory/EmptyHelmetSlot.png' %});
     display: flex;
     position: absolute;
-    top: 270px;
-    left: 265px;
+    top: 70px;
+    left: 225px;
     width: 65px;
     height: 62px;
     justify-content: center;
@@ -34,8 +29,8 @@
     background: url({% static 'Armory/EmptyAmuletSlot.png' %});
     display: flex;
     position: absolute;
-    top: 298px;
-    left: 340px;
+    top: 98px;
+    left: 300px;
     width: 35px;
     height: 35px;
     justify-content: center;
@@ -46,8 +41,8 @@
     background: url({% static 'Armory/EmptyWeaponSlot.png' %});
     display: flex;
     position: absolute;
-    top: 320px;
-    left: 150px;
+    top: 120px;
+    left: 110px;
     width: 65px;
     height: 120px;
     justify-content: center;
@@ -60,8 +55,8 @@
     background: url({% static 'Armory/EmptyArmorSlot.png' %});
     display: flex;
     position: absolute;
-    top: 346px;
-    left: 265px;
+    top: 146px;
+    left: 225px;
     width: 65px;
     height: 94px;
     justify-content: center;
@@ -72,8 +67,8 @@
     background: url({% static 'Armory/EmptyWeaponSlot.png' %});
     display: flex;
     position: absolute;
-    top: 320px;
-    left: 380px;
+    top: 120px;
+    left: 340px;
     width: 65px;
     height: 120px;
     justify-content: center;
@@ -84,8 +79,8 @@
     background: url({% static 'Armory/EmptyGlovesSlot.png' %});
     display: flex;
     position: absolute;
-    top: 450px;
-    left: 150px;
+    top: 250px;
+    left: 110px;
     width: 65px;
     height: 65px;
     justify-content: center;
@@ -96,8 +91,8 @@
     background: url({% static 'Armory/EmptyRingSlot.png' %});
     display: flex;
     position: absolute;
-    top: 450px;
-    left: 220px;
+    top: 250px;
+    left: 180px;
     width: 35px;
     height: 35px;
     justify-content: center;
@@ -108,8 +103,8 @@
     background: url({% static 'Armory/EmptyBeltSlot.png' %});
     display: flex;
     position: absolute;
-    top: 450px;
-    left: 265px;
+    top: 250px;
+    left: 225px;
     width: 65px;
     height: 35px;
     justify-content: center;
@@ -120,8 +115,8 @@
     background: url({% static 'Armory/EmptyRingSlot.png' %});
     display: flex;
     position: absolute;
-    top: 450px;
-    left: 340px;
+    top: 250px;
+    left: 300px;
     width: 35px;
     height: 35px;
     justify-content: center;
@@ -132,14 +127,27 @@
     background: url({% static 'Armory/EmptyBootSlot.png' %});
     display: flex;
     position: absolute;
-    top: 450px;
-    left: 380px;
+    top: 250px;
+    left: 340px;
     width: 65px;
     height: 65px;
     justify-content: center;
     align-items: center;
 }
 
+
+.grid-container {
+    width: 1050px;
+    display: grid;
+    grid-template-columns: 500px 500px;
+    grid-gap:50px;
+
+    padding: 10px
+}
+
+.block {
+
+}
 
 {% endblock %}
 
@@ -148,24 +156,23 @@
 
 
 <div style="line-height:20%">
-    <h2> {{ character.header.name }} </h2>
-    <h6>{{ character.header.class }}({{ character.attributes.level }})</h6>
-    <p> Owner: <a href="{% url 'profile' owner.user.id %}"> {{ owner.user.username }} </a> </p>
+    <h2> {{ character.header.name }}</h2>
+        {% if character.header.hardcore %}
+        <span>(HARDCORE)</span>
+        {% else %}
+        <span>(NON-HARDCORE)</span>
+        {% endif %}
+    <h6> {{ character.header.class }} Level {{ character.attributes.level }} </h6>
 </div>
 
 <div class="grid-container">
-    <div>
-        <div style="line-height: 20%; height: 300px;">
+    <div class="block">
+        <div style="line-height: 20%; height: 300px; position:relative">
             <h2>  <button onclick="swapWeapon()"> SWAP </button> EQUIPMENT </h2>
             <div id="helmet_container" class="equipment-helmet" onmouseenter="handler(event)" onmouseleave="handler(event)"></div>
             <div id="amulet_container" class="equipment-amulet" onmouseenter="handler(event)" onmouseleave="handler(event)"></div>
             <div class="equipment-weapon-left" onmouseenter="handler(event)" onmouseleave="handler(event)">
                 <img id="left-weapon" src="">
-                <!--<div class="dropdown-content">
-                    <p> </p>
-                    <p> </p>
-                    <p> </p>
-                </div>-->
             </div>
             <div id="armor_container" class="equipment-armor" onmouseenter="handler(event)" onmouseleave="handler(event)"></div>
             <div class="equipment-weapon-right" onmouseenter="handler(event)" onmouseleave="handler(event)">
@@ -176,7 +183,7 @@
             <div id="belt_container" class="equipment-belt" onmouseenter="handler(event)" onmouseleave="handler(event)"></div>
             <div id="ring_right_container" class="equipment-ring-right" onmouseenter="handler(event)" onmouseleave="handler(event)"></div>
             <div id="boots_container" class="equipment-boots" onmouseenter="handler(event)" onmouseleave="handler(event)"></div>
-            <div id="statsBox" style="display: none; position: absolute; left: 0px; background:#aaaaff">  </div>
+            <div id="statsBox" style="display: none; position: absolute; left: 0px; background:#cc0000;">  </div>
         </div>
         <br>
         <div style="line-height: 20%">
@@ -210,7 +217,7 @@
             {% endfor %}
         </div>
     </div>
-    <div>
+    <div class="block">
         <div style="line-height: 20%">
             <h2> Skills </h2>
             {% for skill in character.skills %}

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: 35% auto;
+}
+
+{% endblock %}
+
+{% block content %}
+
+<a href="{% url 'ladder nor standard' %}"><button class="button"> Diablo 2 Standard Ladder </button></a>
+<a href="{% url 'ladder nor hardcore' %}"><button class="button"> Diablo 2 Hardcore Ladder </button></a>
+<a href="{% url 'ladder exp standard' %}"><button class="button"> LoD Standard Ladder </button></a>
+<a href="{% url 'ladder exp hardcore' %}"><button class="button"> LoD Hardcore Ladder </button></a>
+
+<div style="background-color: #ee0000; border-style: solid;">
+    <h1>{{ title }}</h1>
+    <table border="1" width="100%" style="text-align: center">
+        <tr>
+            <th>Name</th>
+            <th>Level</th>
+            <th>Class</th>
+            <th>EXP</th>
+        </tr>
+        {% for character in ladder %}
+        <tr>
+            <td> <a href="{% url 'character armory' character.charname %}"> <button style="line-height:1px; font-size: 16px" class="button">{{ character.charname }} </button> </a> </td>
+            <td> {{ character.level }} </td>
+            <td> {{ character.class }} </td>
+            <td> {{ character.experience }} </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% endblock %}

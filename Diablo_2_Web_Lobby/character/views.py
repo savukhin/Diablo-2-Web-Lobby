@@ -44,6 +44,5 @@ def showCharacter(request, name):
         return redirect(request.META.get('HTTP_REFERER'))
 
     return render(request, template_name='character.html',
-                  context={'owner': Character.objects.get(name=name).player,
-                           'character': character,
+                  context={'character': character,
                            'character_dumps': json.dumps(character)})

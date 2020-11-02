@@ -14,10 +14,14 @@ class customDialogue():
 
 
 def messages(request):
+    #Message.objects.all().delete()
     thisCustomUser = CustomUser.objects.get(user=request.user)
     thisDialogues = Dialogue.objects.filter(users=thisCustomUser)
     dialogues = []
     for i in range(0, len(thisDialogues)):
+        lastMessage = Message.objects.filter(dialogue=thisDialogues[i]).last()
+        if (lastMessage == None):
+            continue
         dialogues.append((customDialogue()))
         users = thisDialogues[i].users.all()
         if (users[0] == thisCustomUser):
@@ -25,7 +29,6 @@ def messages(request):
         else:
             dialogues[-1].opponent = users[0]
         dialogues[-1].id = dialogues[-1].opponent.user.id
-        lastMessage = Message.objects.filter(dialogue=thisDialogues[i]).last()
         dialogues[-1].lastMessage = lastMessage
     return render(request, template_name='messages.html',
                   context={'user': CustomUser.objects.get(user_id=request.user.id),

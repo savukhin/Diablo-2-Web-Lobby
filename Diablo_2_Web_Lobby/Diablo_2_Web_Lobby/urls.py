@@ -24,4 +24,5 @@ urlpatterns = [
     path('', include('lobby.urls')),
     path('', include('character.urls')),
     path('', include('dialogues.urls')),
+    path('', include('ladder.urls')),
 ]

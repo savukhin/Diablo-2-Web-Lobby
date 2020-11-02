@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'authentication',
     'character',
     'dialogues',
+    'ladder',
 ]
 
 MIDDLEWARE = [

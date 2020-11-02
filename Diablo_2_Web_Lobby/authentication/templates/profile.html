@@ -7,6 +7,23 @@
     grid-template-columns: auto auto;
 }
 
+label {
+        background-color: #111111;
+        border: solid #990000;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+    }
+
+    label:hover {
+        background-color: #aa1111;
+    }
+
 {% endblock %}
 
 {% load poll_extras %}
@@ -22,12 +39,15 @@
             <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
                 <!--{{ form.as_p }}-->
-                {{ form.photo }}
-                <input type="submit" value="Change photo">
+                <!--{{ form.photo }}-->
+                <label for="profile_pic_btn" id="actual-btn">Choose File</label>
+                <input type="file" id="profile_pic_btn" name="photo" accept=".jpg, .jpeg, .png, .webp" hidden/>
+                <span id="file-chosen">No file chosen</span>
+                <input class="button" type="submit" value="Change photo">
             </form>
             {% else %}
             <br>
-                <a href="{% url 'dialogue' profile.user.id %}"><button>Write message</button></a>
+                <a href="{% url 'dialogue' profile.user.id %}"><button class="button">Write message</button></a>
             {% endif %}
         </div>
     </div>
@@ -44,4 +64,16 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block script%}
+<script>
+    const actualBtn = document.getElementById('profile_pic_btn');
+
+    const fileChosen = document.getElementById('file-chosen');
+
+    actualBtn.addEventListener('change', function(){
+        fileChosen.textContent = this.files[0].name
+    })
+</script>
 {% endblock %}
