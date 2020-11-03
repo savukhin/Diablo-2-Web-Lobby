@@ -7,9 +7,14 @@
     display:grid;
     grid-template-columns: 100px 400px;
     align-items:center;
-    width: 500px;
-    border: solid #aa0000;
+    border: 2px solid rgba(200,0,0,0.8);
+    box-shadow: 0px 3px 2px 3px rgba(0,0,0,0.4);
     padding: 0px 10px;
+    margin-top: 10px;
+}
+
+.message:hover {
+    background-color: #fee;
 }
 
 .message a {
@@ -23,33 +28,34 @@
 
 {% block content %}
 
-<a style="text-decoration: none; color: #000000" href="{% url 'profile' subject.user.id %}"><h1>{{ subject.user.username }}</h1></a>
+<div class="block">
+    <a style="text-decoration: none; color: #000000" href="{% url 'profile' subject.user.id %}"><h1>{{ subject.user.username }}</h1></a>
 
-<div id="main">
-    {% for message in messages %}
-    <div class="message">
-        <div style=" float: left; top:50%">
-            <a href="{% url 'profile' message.Author.user.id %}"><img style="object-fit: cover; width: 100px; height: 100px; border-radius: 50%" src="{{ message.Author.photo.url|file_exists }}"></a>
+    <div id="main">
+        {% for message in messages %}
+        <div class="message">
+            <div style=" float: left; top:50%">
+                <a href="{% url 'profile' message.Author.user.id %}"><img style="object-fit: cover; width: 100px; height: 100px; border-radius: 50%" src="{{ message.Author.photo.url|file_exists }}"></a>
+            </div>
+            <div style="float: left; padding: 0px 20px; transform: translate(0, -10%);">
+                <a href="{% url 'profile' message.Author.user.id %}"><h2 align="left">{{ message.Author.user.username }} </h2></a>
+                <p align="left">{{ message.text }}</p>
+                <h6 align="left">{{ message.date|date:"G:i" }} </h6>
+            </div>
         </div>
-        <div style="float: left; padding: 0px 20px; transform: translate(0, -10%);">
-            <a href="{% url 'profile' message.Author.user.id %}"><h2 align="left">{{ message.Author.user.username }} </h2></a>
-            <p align="left">{{ message.text }}</p>
-            <h6 align="left">{{ message.date|date:"G:i" }} </h6>
-        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
+
+    <!--
+    <form method="post">
+        {% csrf_token %}-->
+        <div style="padding:10px; display: grid; grid-template-columns: 75% auto; grid-gap:2%">
+            <input id="message-input" type="text" placeholder="Type a message...">
+            <!--<input id="chat-message-submit" type="submit" value="Send" style="height:40px">-->
+            <input id="message-submit" type="button" value="Send" style="height:40px">
+        </div>
+    <!--</form>-->
 </div>
-
-<!--
-<form method="post">
-    {% csrf_token %}-->
-    <div style="width:500px; padding:10px; display: grid; grid-template-columns: 75% auto;">
-
-        <input id="message-input" type="text" placeholder="Type a message...">
-        <!--<input id="chat-message-submit" type="submit" value="Send" style="height:40px">-->
-        <input id="message-submit" type="button" value="Send" style="height:40px">
-    </div>
-<!--</form>-->
 {% endblock %}
 
 {% block script %}

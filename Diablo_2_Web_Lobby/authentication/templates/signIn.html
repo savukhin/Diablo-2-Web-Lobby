@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<form method="post">
+<form class="block" method="post">
     {% csrf_token %}
     <h1><input name="username" type="text" size=40 placeholder="Login"/></h1>
     <h1><input name="password" type="password" size=40 placeholder="Password"/></h1>
@@ -10,7 +10,7 @@
         <div>Invalid login or password!</div>
     {% endif %}
 
-    <button type="submit"> Sign In </button>
+    <button class="button" type="submit"> Sign In </button>
 </form>
 
 {% endblock %}

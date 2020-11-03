@@ -2,10 +2,6 @@
 
 {% block styles %}
 
-.grid-container {
-    display: grid;
-    grid-template-columns: auto auto;
-}
 
 label {
         background-color: #111111;
@@ -31,16 +27,16 @@ label {
 {% block content %}
 
 <div class="grid-container">
-    <div>
+    <div class="block">
         <div>
             <img style="object-fit: cover; width: 300px; height: 300px;" src="{{ profile.photo.url|file_exists }}">
-
+            <p></p>
             {% if request.user == profile.user %}
             <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
                 <!--{{ form.as_p }}-->
                 <!--{{ form.photo }}-->
-                <label for="profile_pic_btn" id="actual-btn">Choose File</label>
+                <label class="button" for="profile_pic_btn" id="actual-btn">Choose File</label>
                 <input type="file" id="profile_pic_btn" name="photo" accept=".jpg, .jpeg, .png, .webp" hidden/>
                 <span id="file-chosen">No file chosen</span>
                 <input class="button" type="submit" value="Change photo">
@@ -51,7 +47,7 @@ label {
             {% endif %}
         </div>
     </div>
-    <div>
+    <div class="block">
         <h1> {{ profile.user.username }}</h1>
         <div>
             <h2> Characters: </h2>

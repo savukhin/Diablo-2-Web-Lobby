@@ -3,7 +3,7 @@
 {% block content %}
 
 
-<form method="post">
+<form class="block" method="post">
     {% csrf_token %}
     <h1><input name="name" type="text" size=40 placeholder="Character name"/></h1>
 
@@ -29,7 +29,7 @@
     <p> {{ form.errors }} </p>
     {% endif %}
 
-    <button type="submit"> Create </button>
+    <button class="button" type="submit"> Create </button>
 </form>
 
 {% endblock %}

@@ -6,7 +6,7 @@
 
     <style>
     .header {
-        overflow: hidden;
+        //overflow: hidden;
         background-color: #111111;
         position: fixed;
         text-align: center;
@@ -15,7 +15,7 @@
         width: 100%;
     }
 
-    .header a {
+    .header-element {
         float: center;
         display: inline-block;
         color: #ffffff;
@@ -25,7 +25,7 @@
         font-size: 27px;
     }
 
-    .header a:hover {
+    .header-element:hover {
         background: #aa0000;
         color: white;
     }
@@ -46,6 +46,45 @@
 
     .button:hover {
         background-color: #aa1111;
+        border: solid #111111;
+        border-radius: 5%;
+    }
+
+    .dropdown {
+        display: inline-block;
+    }
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #a00;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.4);
+        z-index: 1;
+    }
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+    .dropdown-element {
+        font-size: 20px;
+        border: 1px solid #111;
+        padding: 1px 10px;
+        cursor:pointer;
+    }
+    .dropdown-element:hover {
+        background-color: #100;
+    }
+
+    .grid-container {
+        width: 1050px;
+        display: grid;
+        grid-template-columns: 500px 500px;
+        grid-gap:50px;
+
+    }
+    .block {
+        width: 500px;
+        padding: 20px;
+        box-shadow: 0px 4px 10px 0px rgba(0,0,0,0.4);
     }
 
         {% block styles %} {% endblock %}
@@ -63,16 +102,24 @@
 </div>
 
 <div class="header">
-    <a href="{% url 'index' %}">Home</a>
-    <a href="{% url 'ladder' %}">Ladder</a>
+    <a class="header-element" href="{% url 'index' %}">Home</a>
+    <a class="header-element" href="{% url 'ladder' %}">Ladder</a>
+    <div class="dropdown header-element">
+        Server
+        <div class="dropdown-content">
+            <a><div class="dropdown-element"><p>First server</p></div></a>
+            <a><div class="dropdown-element"><p>Second server</p></div></a>
+        </div>
+    </div>
+
     {% if not request.user.is_authenticated %}
-    <a href="{% url 'sign in' %}">Sign In</a>
-    <a href="{% url 'sign up' %}">Sign Up</a>
+    <a class="header-element"  href="{% url 'sign in' %}">Sign In</a>
+    <a class="header-element"  href="{% url 'sign up' %}">Sign Up</a>
     {% else %}
-    <a href="{% url 'preLobby' %}">Lobby</a>
-    <a href="{% url 'profile' request.user.id %}">Profile</a>
-    <a href="{% url 'messages' %}">Messages</a>
-    <a href="{% url 'sign out' %}">Sign Out</a>
+    <a class="header-element"  href="{% url 'preLobby' %}">Lobby</a>
+    <a class="header-element"  href="{% url 'profile' request.user.id %}">Profile</a>
+    <a class="header-element"  href="{% url 'messages' %}">Messages</a>
+    <a class="header-element"  href="{% url 'sign out' %}">Sign Out</a>
     {% endif %}
 </div>
 

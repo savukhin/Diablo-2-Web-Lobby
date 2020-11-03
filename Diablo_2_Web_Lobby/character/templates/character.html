@@ -3,16 +3,6 @@
 {% block styles %}
 
 
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #fff1f1;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
-}
-
-
 .equipment-helmet {
     background: url({% static 'Armory/EmptyHelmetSlot.png' %});
     display: flex;
@@ -136,19 +126,6 @@
 }
 
 
-.grid-container {
-    width: 1050px;
-    display: grid;
-    grid-template-columns: 500px 500px;
-    grid-gap:50px;
-
-    padding: 10px
-}
-
-.block {
-
-}
-
 {% endblock %}
 
 
@@ -168,7 +145,7 @@
 <div class="grid-container">
     <div class="block">
         <div style="line-height: 20%; height: 300px; position:relative">
-            <h2>  <button onclick="swapWeapon()"> SWAP </button> EQUIPMENT </h2>
+            <h2>  <button style="line-height:4px; " class="button" onclick="swapWeapon()"> SWAP </button> EQUIPMENT </h2>
             <div id="helmet_container" class="equipment-helmet" onmouseenter="handler(event)" onmouseleave="handler(event)"></div>
             <div id="amulet_container" class="equipment-amulet" onmouseenter="handler(event)" onmouseleave="handler(event)"></div>
             <div class="equipment-weapon-left" onmouseenter="handler(event)" onmouseleave="handler(event)">
