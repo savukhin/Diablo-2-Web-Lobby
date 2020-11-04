@@ -1,9 +1,33 @@
 {% extends 'base.html' %}
 
+{% block styles %}
+
+.grid-container {
+    width: 1050px;
+    display: grid;
+    grid-template-columns: 25% 25% 25% 25%;
+    grid-gap:0px;
+}
+
+{% endblock %}
+
 {% block content %}
 
-<h1>Leviathan Main Page</h1>
-<p>Welcome to <em>Leviathan server</em></p>
-<h2>Sign In or Sign Up to check lobbies</h2>
+<h1>D2Sats Main Page</h1>
+<p>Welcome to <em>D2Stats</em></p>
+<h2>See statistics of Diablo 2 Servers!</h2>
 
+<div class="block" style="width:1000px">
+    <div class="grid-container">
+        <div>Name</div>
+        <div>Users</div>
+        <div>Games</div>
+    </div>
+    <div class="grid-container">
+        <div> My Server </div>
+        <div> 0 </div>
+        <div> 0 :( </div>
+        <div><button>Switch</button></div>
+    </div>
+</div>
 {% endblock %}

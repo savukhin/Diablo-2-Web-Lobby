@@ -3,9 +3,9 @@ from django.http import HttpResponse
 from character.forms import CharacterCreateForm
 from character.models import Character
 from authentication.models import CustomUser
-from django.http import HttpResponseRedirect
+from Diablo_2_Web_Lobby.servers import servers
 from character.PvPGNCharacter import createPvPGNCharacter
-import json
+import urllib.request, json
 # Create your views here.
 
 
@@ -27,9 +27,8 @@ def createCharacter(request):
     return render(request, template_name='createCharacter.html')
 
 
-def getCharacter(name):
-    import urllib.request, json
-    fp = urllib.request.urlopen("http://127.0.0.1:8001/" + name)
+def getCharacter(server, name):
+    fp = urllib.request.urlopen("http://" + server + "/getCharacter/" + name)
     mystr = (fp.read()).decode("utf-8")
     fp.close()
     if mystr[0] == 'E': #That means the word is Error (not a start of the json)
@@ -39,7 +38,7 @@ def getCharacter(name):
 
 
 def showCharacter(request, name):
-    character = getCharacter(name)
+    character = getCharacter(servers[request.path.split('/')[1]], name)
     if (character == "ERROR"):
         return redirect(request.META.get('HTTP_REFERER'))
 
