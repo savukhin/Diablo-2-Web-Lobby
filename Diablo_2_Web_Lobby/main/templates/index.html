@@ -20,14 +20,19 @@
 <div class="block" style="width:1000px">
     <div class="grid-container">
         <div>Name</div>
-        <div>Users</div>
+        <div>Users playing now</div>
         <div>Games</div>
     </div>
-    <div class="grid-container">
-        <div> My Server </div>
-        <div> 0 </div>
-        <div> 0 :( </div>
-        <div><button>Switch</button></div>
-    </div>
+    <br>
+
+    {% for key, data in serv.items %}
+        <div class="grid-container">
+            <div> My Server </div>
+            <div> {{ data.runningCountOfUsers }} </div>
+            <div> {{ data.runningCountOfGames }} </div>
+            <div><button>Switch</button></div>
+        </div>
+    {% endfor %}
 </div>
+
 {% endblock %}

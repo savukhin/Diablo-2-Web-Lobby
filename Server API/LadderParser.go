@@ -141,7 +141,6 @@ func get_ladder(file string) string {
 
 	temp := make(map[string][]character)
 
-	fmt.Println("size: ", size)
 	written := false
 	for size > 0 {
 		if len(temp["nor"]) > 0 && !written {
@@ -223,8 +222,6 @@ func get_ladder(file string) string {
 	if err != nil {
 		fmt.Println("ERROR", err)
 	}
-
-	fmt.Println(temp["exp"][0])
 
 	return string(ladder)
 }
