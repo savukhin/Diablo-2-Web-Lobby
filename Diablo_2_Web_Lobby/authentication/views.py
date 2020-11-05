@@ -3,7 +3,9 @@ from django.contrib.auth import authenticate, login, logout
 from authentication.models import CustomUser, PvpgnBnet
 from authentication.forms import FormReg
 from django.contrib.auth.models import User
+from Diablo_2_Web_Lobby.servers import servers
 from character.models import Character
+import urllib.request, json
 from authentication.forms import ChangeAvatarForm
 
 # Create your views here.
@@ -56,7 +58,14 @@ def signOut(request):
 def profile(request, id):
     djangoUser = User.objects.get(id=id)
     customUser = CustomUser.objects.get(user_id=djangoUser.id)
-    characters = Character.objects.filter(player_id=customUser.id)
+    #characters = Character.objects.filter(player_id=customUser.id)
+    fp = urllib.request.urlopen("http://" + servers[request.path.split("/")[1]] + "/getCharactersFromUser/" + customUser.user.username)
+    mystr = (fp.read()).decode("utf-8")
+    fp.close()
+    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
+        return "ERROR"
+    characters = mystr.split("\n")[:-1]
+    print(characters)
     if request.method == "POST":
         form = ChangeAvatarForm(request.POST, request.FILES)
         if form.is_valid():

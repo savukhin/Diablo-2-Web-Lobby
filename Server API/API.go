@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -99,6 +100,20 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getCharactersFromUser(w http.ResponseWriter, r *http.Request) {
+	username := r.URL.Path[len("/getCharactersFromUser/"):]
+	directory := "D:/PvPGN/Magic_Builder/release/var/charinfo/" + username + "/"
+	files, err := ioutil.ReadDir(directory)
+	if err != nil {
+		fmt.Fprintln(w, "Error: user doesn't exists! ", err)
+	}
+	for _, f := range files {
+		if !f.IsDir() {
+			fmt.Fprintln(w, f.Name())
+		}
+	}
+}
+
 func favicon(w http.ResponseWriter, r *http.Request) {
 
 }
@@ -120,6 +135,7 @@ func main() {
 	http.HandleFunc("/getStatus/", getStatus)
 	http.HandleFunc("/getGamelist/", getGamelist)
 	http.HandleFunc("/getUser/", getUser)
+	http.HandleFunc("/getCharactersFromUser/", getCharactersFromUser)
 	fmt.Println("Started")
 	err = http.ListenAndServe(":6110", nil)
 	if err != nil {
