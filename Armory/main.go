@@ -3,30 +3,45 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
+	"strings"
 
 	"github.com/nokka/d2s"
 )
 
-func sayhello(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Привет!")
-}
+var servers = map[string]string{"MyServer": "127.0.0.1:6110/", "": "127.0.0.1:6110/"}
 
 func showChar(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path[1:]
-	directory := "D:/PvPGN/Magic_Builder/release/var/charsave/"
-	file, err := os.Open(directory + path)
+	parts := strings.Split(path, "/")
+	server := parts[0]
+	characterName := parts[1]
+	pathToServer := "http://" + servers[server] + "getCharacter/" + characterName
+	//pathToServer := "http://127.0.0.1:6110/getCharacter/artificial"
+	fmt.Println(pathToServer)
+	resp, err := http.Get(pathToServer)
+	fmt.Println(resp.Body)
+	defer resp.Body.Close()
+	file, err := ioutil.ReadAll(resp.Body)
+	//fmt.Println(string(file))
 	if err != nil {
-		//log.Fatal("Error while opening .d2s file ", err)
-		fmt.Fprintf(w, "Error while opening .d2s file ", err)
+		fmt.Fprintf(w, "Error:", err)
 		return
 	}
+	/*
+		file, err := ioutil.ReadAll(resp.Body)
+		fmt.Fprintf(w, "Resp:", string(file), "END\n")
+		if err != nil {
+			fmt.Fprintf(w, "Error:", err)
+			return
+		}
+	*/
 
-	defer file.Close()
-
-	char, err := d2s.Parse(file)
+	fmt.Println(4)
+	char, err := d2s.Parse(resp.Body)
+	fmt.Println(5)
 	if err != nil {
 		fmt.Fprintf(w, "Error:", err)
 		return

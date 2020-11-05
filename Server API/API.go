@@ -1,17 +1,16 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"regexp"
 	"strconv"
-	"strings"
 
+	_ "github.com/lib/pq"
 	"github.com/nokka/d2s"
-	"github.com/reiver/go-telnet"
 )
 
 const directory = "D:/PvPGN/Magic_Builder/release/var/charsave/"
@@ -32,73 +31,71 @@ func getCharacter(w http.ResponseWriter, r *http.Request) {
 func getLadder(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, parseLadder())
 }
-func getStatus(w http.ResponseWriter, r *http.Request) {
-	conn, _ := telnet.DialTo("127.0.0.1:8888")
-	conn.Write([]byte("abcd123\n"))
-	telnetReadUntil(">", conn)
-	conn.Write([]byte("status\n"))
-	answer := strings.Split(telnetReadUntil(">", conn), "\n")
-	maxGames, _ := strconv.Atoi(strings.Split(answer[2][:len(answer[2])-1], " ")[3])
-	currentGames, _ := strconv.Atoi(strings.Split(answer[3][:len(answer[3])-1], " ")[3])
-	//maxUsers, _ := strconv.Atoi(strings.Split(answer[4][:len(answer[4])-1], " ")[3])
-	currentUsers, _ := strconv.Atoi(strings.Split(answer[4][:len(answer[4])-1], " ")[4])
-	res := map[string]int{
-		"maximumCountOfGames": maxGames,
-		"runningCountOfGames": currentGames,
-		//"maximumCountOfUsers": maxUsers,
-		"runningCountOfUsers": currentUsers,
+
+func getUserFromFile(username string) (User, error) {
+	directory := "D:/PvPGN/PvPGN/var/users/" + username
+	file, err := os.Open(directory)
+	if err != nil {
+		return User{}, err
 	}
+	defer file.Close()
 
-	jsonString, _ := json.Marshal(res)
-	fmt.Fprintln(w, string(jsonString))
+	scanner := bufio.NewScanner(file)
+
+	scanner.Scan()
+	passhash := scanner.Text()
+	passhash = passhash[len("\"BNET\\\\acct\\\\passhash1\"=\"") : len(passhash)-1]
+
+	scanner.Scan()
+	email := scanner.Text()
+	email = email[len("\"BNET\\\\acct\\\\email\"=\"") : len(email)-1]
+
+	scanner.Scan()
+	scanner.Text() //This is for username
+
+	scanner.Scan()
+	lastlogin_ip := scanner.Text()
+	lastlogin_ip = lastlogin_ip[len("\"BNET\\\\acct\\\\lastlogin_ip\"=\"") : len(lastlogin_ip)-1]
+
+	scanner.Scan()
+	lastlogin_clienttag := scanner.Text()
+	lastlogin_clienttag = lastlogin_clienttag[len("\"BNET\\\\acct\\\\lastlogin_clienttag\"=\"") : len(lastlogin_clienttag)-1]
+
+	scanner.Scan()
+	lastlogin_owner := scanner.Text()
+	lastlogin_owner = lastlogin_owner[len("\"BNET\\\\acct\\\\lastlogin_owner\"=\"") : len(lastlogin_owner)-1]
+
+	scanner.Scan()
+	lastlogin_time := scanner.Text()
+	lastlogin_time = lastlogin_time[len("\"BNET\\\\acct\\\\lastlogin_time\"=\"") : len(lastlogin_time)-1]
+
+	scanner.Scan()
+	userid := scanner.Text()
+	userid = userid[len("\"BNET\\\\acct\\\\userid\"=\"") : len(userid)-1]
+
+	scanner.Scan()
+	ctime := scanner.Text()
+	ctime = ctime[len("\"BNET\\\\acct\\\\ctime\"=\"") : len(ctime)-1]
+
+	lastlogin_time_int, _ := strconv.Atoi(lastlogin_time)
+	userid_int, _ := strconv.Atoi(userid)
+	user := User{passhash, email, username, lastlogin_ip, lastlogin_clienttag, lastlogin_owner, lastlogin_time_int, userid_int, ctime}
+	return user, err
 }
 
-func getGames() [][]byte {
-	conn, _ := telnet.DialTo("127.0.0.1:8888")
-	conn.Write([]byte("abcd123\n"))
-	telnetReadUntil(">", conn)
-	conn.Write([]byte("gl\n"))
-	answer := telnetReadUntil(">", conn)
-
-	validRegexp := regexp.MustCompile(`\|[^\|]*\|`)
-	games := validRegexp.FindAll([]byte(answer), -1)
-	return games
-}
-
-func getGamelist(w http.ResponseWriter, r *http.Request) {
-	games := getGames()
-	for i := range games {
-		var raw []string
-		for _, val := range strings.Split(string(games[i])[1:len(games[i])-1], " ") {
-			if val != "" {
-				raw = append(raw, val)
-			}
-		}
-
-		game := map[string]string{"No": raw[0],
-			"GameName": raw[1]}
-		if len(raw) == 10 { //Game doesn't have a Password
-			game["ID"] = raw[2]
-			game["GameVer"] = raw[3]
-			game["Type"] = raw[4]
-			game["Difficulty"] = raw[5]
-			game["Ladder"] = raw[6]
-			game["Users"] = raw[7]
-			game["CreateTime"] = raw[8]
-			game["Disable"] = raw[9]
-		} else {
-			game["password"] = raw[2]
-			game["ID"] = raw[3]
-			game["GameVer"] = raw[4]
-			game["Type"] = raw[5]
-			game["Difficulty"] = raw[6]
-			game["Ladder"] = raw[7]
-			game["Users"] = raw[8]
-			game["CreateTime"] = raw[9]
-			game["Disable"] = raw[10]
-		}
-		jsonString, _ := json.Marshal(game)
-		fmt.Fprintf(w, string(jsonString))
+func getUser(w http.ResponseWriter, r *http.Request) {
+	username := r.URL.Path[len("/getUser/"):]
+	user, err := getUserFromDataBase(username)
+	//user, err := getUserFromFile(username)
+	if err != nil {
+		fmt.Fprintf(w, "Error finding user ", err)
+		return
+	}
+	ans, err := json.Marshal(user)
+	fmt.Fprintln(w, string(ans))
+	if err != nil {
+		fmt.Fprintf(w, "Error while parsing ", err)
+		return
 	}
 }
 
@@ -106,25 +103,25 @@ func favicon(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func telnetReadUntil(symbol string, conn *telnet.Conn) string {
-	bs := make([]byte, 1)
-	s := ""
-	for string(bs) != ">" {
-		conn.Read(bs)
-		s += string(bs)
-	}
-	return s
-}
-
 func main() {
 	fmt.Println("Starting app...")
+	getUserFromFile("savukhin")
+	fmt.Println("Connecting to database...")
+	err := connectToDatabase()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Connected to database!")
+	fmt.Println("Starting API...")
 	http.HandleFunc("/favicon.ico", favicon)
 	http.HandleFunc("/getCharacter/", getCharacter)
 	http.HandleFunc("/getLadder/", getLadder)
 	http.HandleFunc("/getStatus/", getStatus)
 	http.HandleFunc("/getGamelist/", getGamelist)
+	http.HandleFunc("/getUser/", getUser)
 	fmt.Println("Started")
-	err := http.ListenAndServe(":6110", nil)
+	err = http.ListenAndServe(":6110", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
