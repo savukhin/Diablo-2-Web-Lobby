@@ -223,6 +223,5 @@ func get_ladder(file string) string {
 func parseLadder() string {
 	file := "D:/PvPGN/Magic_Builder/release/var/ladders/ladder.D2DV"
 	ladder := get_ladder(file)
-	println(ladder)
 	return ladder
 }

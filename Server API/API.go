@@ -114,6 +114,27 @@ func getCharactersFromUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func checkLogin(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		if err := r.ParseForm(); err != nil {
+			fmt.Fprintf(w, "Error in ParseForm() ", err)
+			return
+		}
+		fmt.Fprintf(w, "Post from website! r.PostFrom = %v\n", r.PostForm)
+		username := r.FormValue("username")
+		passhash := r.FormValue("passhash")
+		user, _ := getUserFromDataBase(username)
+		//user, _ := getUserFromFile(username)
+		if passhash == user.Passhash1 {
+			fmt.Fprintln(w, "OK")
+		} else {
+			fmt.Fprintln(w, "Error login rejected")
+		}
+	} else {
+		fmt.Fprintln(w, "Error must be POST request but this is", r.Method)
+	}
+}
+
 func favicon(w http.ResponseWriter, r *http.Request) {
 
 }
@@ -136,6 +157,7 @@ func main() {
 	http.HandleFunc("/getGamelist/", getGamelist)
 	http.HandleFunc("/getUser/", getUser)
 	http.HandleFunc("/getCharactersFromUser/", getCharactersFromUser)
+	http.HandleFunc("/checkLogin", checkLogin)
 	fmt.Println("Started")
 	err = http.ListenAndServe(":6110", nil)
 	if err != nil {

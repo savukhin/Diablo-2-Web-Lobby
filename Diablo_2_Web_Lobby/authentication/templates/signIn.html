@@ -9,7 +9,12 @@
     {% if not request.user.is_authenticated and request.method == "POST" %}
         <div>Invalid login or password!</div>
     {% endif %}
-
+    <label for="server">Server:</label>
+    <select name="server" id="server">
+        <option value="MyServer">MyServer</option>
+    </select>
+    <br/>
+    <br/>
     <button class="button" type="submit"> Sign In </button>
 </form>
 

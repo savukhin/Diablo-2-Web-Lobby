@@ -6,7 +6,9 @@ from django.contrib.auth.models import User
 from Diablo_2_Web_Lobby.servers import servers
 from character.models import Character
 import urllib.request, json
+import requests
 from authentication.forms import ChangeAvatarForm
+from authentication.passhash import makeHash
 
 # Create your views here.
 
@@ -16,13 +18,26 @@ def createPvPGNProfile(name, password, email, isAdmin="false"):
     return newProfile
 
 
+def checkLogin(server, username, password):
+    response = requests.post("http://" + server + "/checkLogin", data={'username': username,
+                                                                       "passhash": makeHash(password)})
+    mystr = response.text
+    response.close()
+    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
+        return False
+    return True
+
 #View for Log in (sign in)
 def signIn(request):
     if request.method == 'POST': #If 'submit' button has been pressed then try to authenticate
-        user = authenticate(username=request.POST['username'], password=request.POST['password'])
-        if user is not None: #If Django found a user then login
-            login(request, user)
-            return redirect('/')
+
+        if checkLogin(servers[request.POST['server']], request.POST['username'], request.POST['password']):
+
+            user = authenticate(username=request.POST['username'], password=request.POST['password'])
+            if user is not None: #If Django found a user then login
+                login(request, user)
+                return redirect('/')
+
     return render(request, template_name='signIn.html')
 
 
