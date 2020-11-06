@@ -2,8 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
-	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -11,8 +9,8 @@ import (
 	"github.com/reiver/go-telnet"
 )
 
-func getGames() [][]byte {
-	conn, _ := telnet.DialTo("127.0.0.1:8888")
+func getGames() ([][]byte, error) {
+	conn, err := telnet.DialTo("127.0.0.1:8888")
 	conn.Write([]byte("abcd123\n"))
 	telnetReadUntil(">", conn)
 	conn.Write([]byte("gl\n"))
@@ -20,11 +18,15 @@ func getGames() [][]byte {
 
 	validRegexp := regexp.MustCompile(`\|[^\|]*\|`)
 	games := validRegexp.FindAll([]byte(answer), -1)
-	return games
+	return games, err
 }
 
-func getGamelist(w http.ResponseWriter, r *http.Request) {
-	games := getGames()
+func getGamelist() ([][]byte, error) {
+	games, err := getGames()
+	if err != nil {
+		return [][]byte{}, err
+	}
+	var ans [][]byte
 	for i := range games {
 		var raw []string
 		for _, val := range strings.Split(string(games[i])[1:len(games[i])-1], " ") {
@@ -55,9 +57,13 @@ func getGamelist(w http.ResponseWriter, r *http.Request) {
 			game["CreateTime"] = raw[9]
 			game["Disable"] = raw[10]
 		}
-		jsonString, _ := json.Marshal(game)
-		fmt.Fprintf(w, string(jsonString))
+		jsonString, err := json.Marshal(game)
+		if err != nil {
+			return [][]byte{}, err
+		}
+		ans = append(ans, jsonString)
 	}
+	return ans, err
 }
 
 func telnetReadUntil(symbol string, conn *telnet.Conn) string {
@@ -70,7 +76,7 @@ func telnetReadUntil(symbol string, conn *telnet.Conn) string {
 	return s
 }
 
-func getStatus(w http.ResponseWriter, r *http.Request) {
+func getStatus() ([]byte, error) {
 	conn, _ := telnet.DialTo("127.0.0.1:8888")
 	conn.Write([]byte("abcd123\n"))
 	telnetReadUntil(">", conn)
@@ -87,6 +93,6 @@ func getStatus(w http.ResponseWriter, r *http.Request) {
 		"runningCountOfUsers": currentUsers,
 	}
 
-	jsonString, _ := json.Marshal(res)
-	fmt.Fprintln(w, string(jsonString))
+	jsonString, err := json.Marshal(res)
+	return jsonString, err
 }

@@ -59,21 +59,6 @@ func remove_null(text string) string {
 	return strings.Split(text, "\x00")[0]
 }
 
-/*
-type character struct {
-	charname   string
-	prefix     string
-	experience uint32
-	class      string
-	sex        string
-	level      int
-	_type      string
-	difficulty int
-	hc         int
-	died       int
-}
-*/
-
 type character struct {
 	Charname   string `json:"charname"`
 	Prefix     string `json:"prefix"`

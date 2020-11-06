@@ -1,93 +1,58 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
-	"strconv"
 
 	_ "github.com/lib/pq"
-	"github.com/nokka/d2s"
 )
 
-const directory = "D:/PvPGN/Magic_Builder/release/var/charsave/"
+func getUser(username string) (User, error) {
+	if fileMode == "DataBase" {
+		return getUserFromDataBase(username)
+	} else {
+		return getUserFromFile(username)
+	}
+}
 
-func getCharacter(w http.ResponseWriter, r *http.Request) {
+func registerUser(username string, passhash string, email string) (User, error) {
+	user, err := getUser(username)
+	if err == nil {
+		return user, errors.New("Username is taken")
+	}
+	if fileMode == "Plain" {
+		return registerUserInFile(username, passhash, email)
+	} else {
+		return registerUserInDataBase(username, passhash, email)
+	}
+}
+
+func getCharacterView(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path[len("/getCharacter/"):]
-	file, err := os.Open(directory + path)
-	defer file.Close()
-	char, _ := d2s.Parse(file)
+	char, err := getCharacterFromFile(path)
+	if err != nil {
+		fmt.Fprintf(w, "Error while opening character file ", err)
+		return
+	}
 	ans, err := json.Marshal(char)
 	fmt.Fprintln(w, string(ans))
 	if err != nil {
-		fmt.Fprintf(w, "Error while opening .d2s file ", err)
+		fmt.Fprintf(w, "Error while parsign character class  ", err)
 		return
 	}
 }
 
-func getLadder(w http.ResponseWriter, r *http.Request) {
+func getLadderView(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, parseLadder())
 }
 
-func getUserFromFile(username string) (User, error) {
-	directory := "D:/PvPGN/PvPGN/var/users/" + username
-	file, err := os.Open(directory)
-	if err != nil {
-		return User{}, err
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-
-	scanner.Scan()
-	passhash := scanner.Text()
-	passhash = passhash[len("\"BNET\\\\acct\\\\passhash1\"=\"") : len(passhash)-1]
-
-	scanner.Scan()
-	email := scanner.Text()
-	email = email[len("\"BNET\\\\acct\\\\email\"=\"") : len(email)-1]
-
-	scanner.Scan()
-	scanner.Text() //This is for username
-
-	scanner.Scan()
-	lastlogin_ip := scanner.Text()
-	lastlogin_ip = lastlogin_ip[len("\"BNET\\\\acct\\\\lastlogin_ip\"=\"") : len(lastlogin_ip)-1]
-
-	scanner.Scan()
-	lastlogin_clienttag := scanner.Text()
-	lastlogin_clienttag = lastlogin_clienttag[len("\"BNET\\\\acct\\\\lastlogin_clienttag\"=\"") : len(lastlogin_clienttag)-1]
-
-	scanner.Scan()
-	lastlogin_owner := scanner.Text()
-	lastlogin_owner = lastlogin_owner[len("\"BNET\\\\acct\\\\lastlogin_owner\"=\"") : len(lastlogin_owner)-1]
-
-	scanner.Scan()
-	lastlogin_time := scanner.Text()
-	lastlogin_time = lastlogin_time[len("\"BNET\\\\acct\\\\lastlogin_time\"=\"") : len(lastlogin_time)-1]
-
-	scanner.Scan()
-	userid := scanner.Text()
-	userid = userid[len("\"BNET\\\\acct\\\\userid\"=\"") : len(userid)-1]
-
-	scanner.Scan()
-	ctime := scanner.Text()
-	ctime = ctime[len("\"BNET\\\\acct\\\\ctime\"=\"") : len(ctime)-1]
-
-	lastlogin_time_int, _ := strconv.Atoi(lastlogin_time)
-	userid_int, _ := strconv.Atoi(userid)
-	user := User{passhash, email, username, lastlogin_ip, lastlogin_clienttag, lastlogin_owner, lastlogin_time_int, userid_int, ctime}
-	return user, err
-}
-
-func getUser(w http.ResponseWriter, r *http.Request) {
+func getUserView(w http.ResponseWriter, r *http.Request) {
 	username := r.URL.Path[len("/getUser/"):]
-	user, err := getUserFromDataBase(username)
-	//user, err := getUserFromFile(username)
+	user, err := getUser(username)
 	if err != nil {
 		fmt.Fprintf(w, "Error finding user ", err)
 		return
@@ -100,7 +65,7 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getCharactersFromUser(w http.ResponseWriter, r *http.Request) {
+func getCharactersFromUserView(w http.ResponseWriter, r *http.Request) {
 	username := r.URL.Path[len("/getCharactersFromUser/"):]
 	directory := "D:/PvPGN/Magic_Builder/release/var/charinfo/" + username + "/"
 	files, err := ioutil.ReadDir(directory)
@@ -114,7 +79,7 @@ func getCharactersFromUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func checkLogin(w http.ResponseWriter, r *http.Request) {
+func checkLoginView(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		if err := r.ParseForm(); err != nil {
 			fmt.Fprintf(w, "Error in ParseForm() ", err)
@@ -123,8 +88,7 @@ func checkLogin(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Post from website! r.PostFrom = %v\n", r.PostForm)
 		username := r.FormValue("username")
 		passhash := r.FormValue("passhash")
-		user, _ := getUserFromDataBase(username)
-		//user, _ := getUserFromFile(username)
+		user, _ := getUser(username)
 		if passhash == user.Passhash1 {
 			fmt.Fprintln(w, "OK")
 		} else {
@@ -135,31 +99,81 @@ func checkLogin(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func registerView(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		if err := r.ParseForm(); err != nil {
+			fmt.Fprintf(w, "Error in ParseForm() ", err)
+			return
+		}
+		username := r.FormValue("username")
+		passhash := r.FormValue("passhash")
+		email := r.FormValue("email")
+		user, err := registerUser(username, passhash, email)
+		if err == nil {
+			ans, err := json.Marshal(user)
+			if err != nil {
+				fmt.Fprintf(w, "Error while parsing ", err)
+				return
+			}
+			fmt.Fprintln(w, string(ans))
+		} else {
+			if err.Error() == "Username is taken" {
+				fmt.Fprintln(w, err)
+			} else {
+				fmt.Fprintln(w, "Error ", err)
+			}
+		}
+	} else {
+		fmt.Fprintln(w, "Error must be POST request but this is", r.Method)
+	}
+}
+
+func getStatusView(w http.ResponseWriter, r *http.Request) {
+	ans, err := getStatus()
+	if err != nil {
+		fmt.Fprintln(w, "Error while parsing status json", err)
+	}
+	fmt.Fprintln(w, string(ans))
+}
+
+func getGamelistView(w http.ResponseWriter, r *http.Request) {
+	ans, err := getGamelist()
+	if err != nil {
+		fmt.Fprintln(w, "Error while parsing status json", err)
+	}
+	for game := range ans {
+		fmt.Fprintln(w, string(game))
+	}
+}
+
 func favicon(w http.ResponseWriter, r *http.Request) {
 
 }
 
 func main() {
+	println("qwer")
+	print("qwer")
 	fmt.Println("Starting app...")
-	getUserFromFile("savukhin")
-	fmt.Println("Connecting to database...")
-	err := connectToDatabase()
-	if err != nil {
-		panic(err)
+	if fileMode != "Plain" {
+		fmt.Println("Connecting to database...")
+		err := connectToDatabase()
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("Connected to database!")
 	}
-
-	fmt.Println("Connected to database!")
 	fmt.Println("Starting API...")
 	http.HandleFunc("/favicon.ico", favicon)
-	http.HandleFunc("/getCharacter/", getCharacter)
-	http.HandleFunc("/getLadder/", getLadder)
-	http.HandleFunc("/getStatus/", getStatus)
-	http.HandleFunc("/getGamelist/", getGamelist)
-	http.HandleFunc("/getUser/", getUser)
-	http.HandleFunc("/getCharactersFromUser/", getCharactersFromUser)
-	http.HandleFunc("/checkLogin", checkLogin)
+	http.HandleFunc("/getCharacter/", getCharacterView)
+	http.HandleFunc("/getLadder/", getLadderView)
+	http.HandleFunc("/getStatus/", getStatusView)
+	http.HandleFunc("/getGamelist/", getGamelistView)
+	http.HandleFunc("/getUser/", getUserView)
+	http.HandleFunc("/getCharactersFromUser/", getCharactersFromUserView)
+	http.HandleFunc("/checkLogin", checkLoginView)
+	http.HandleFunc("/register", registerView)
 	fmt.Println("Started")
-	err = http.ListenAndServe(":6110", nil)
+	err := http.ListenAndServe(":6110", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}

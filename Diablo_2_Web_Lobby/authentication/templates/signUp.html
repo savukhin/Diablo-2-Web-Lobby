@@ -9,13 +9,20 @@
     <h1><input name="password1" type="password" size=40 placeholder="Password"/></h1>
     <h1><input name="password2" type="password" size=40 placeholder="Repeat Password"/></h1>
     <h1><input name="email" type="email" size=40 placeholder="E-mail"/></h1>
+    <label for="server">Server:</label>
+    <select name="server" id="server">
+        <option value="MyServer">MyServer</option>
+    </select>
+    <br/>
+    <br/>
     <input class="button" type="submit" value="Sign Up">
 
-    {% if form.errors and request.method == 'POST'%}
-    <div class="alert alert-danger" role="alert">{{ form.errors }}</div>
-    {% elif request.method == 'POST' %}
-    <div class="alert alert-success" role="alert">User created successfully!</div>
+    {% if form.errors %}
+    <div style="color:#cc1111" class="alert alert-danger" role="alert">{{ form.errors }}</div>
     {% endif %}
+
+    <p style="color:#cc1111">{{ error }}</p>
+
 
 </form>
 

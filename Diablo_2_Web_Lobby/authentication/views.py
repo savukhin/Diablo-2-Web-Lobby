@@ -27,6 +27,19 @@ def checkLogin(server, username, password):
         return False
     return True
 
+def register(server, username, password, email):
+    response = requests.post("http://" + server + "/register", data={'username': username,
+                                                                     "passhash": makeHash(password),
+                                                                     'email': email})
+    mystr = response.text
+    response.close()
+    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
+        return False
+    elif mystr[0] == 'U':
+        return "Username is taken"
+
+    return True
+
 #View for Log in (sign in)
 def signIn(request):
     if request.method == 'POST': #If 'submit' button has been pressed then try to authenticate
@@ -46,6 +59,7 @@ def signUp(request):
     if request.method == 'POST': #If 'submit' button has been pressed
         formUser = FormReg(request.POST)
         if formUser.is_valid(): #If input data is correct
+            '''
             #Instance of PvPGN Profile
             newPvPGNProfile = createPvPGNProfile(request.POST['username'], request.POST['password1'],
                                                  request.POST['email'])
@@ -57,7 +71,15 @@ def signUp(request):
             #And authentication
             user = authenticate(username=request.POST['username'], password=request.POST['password1'])
             login(request, user)
+            '''
+            response = register(servers[request.POST['server']], request.POST['username'],
+                     request.POST['password1'], request.POST['email'])
+            if (response == "Username is taken"):
+                print("Yoh!....")
+                return render(request, template_name='signUp.html', context={"error": "Username is taken"})
+
             return redirect('/')
+        print("Em....")
         return render(request, template_name='signUp.html', context={'form': formUser})
 
     return render(request, template_name='signUp.html')

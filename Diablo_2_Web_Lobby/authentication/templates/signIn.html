@@ -6,9 +6,6 @@
     {% csrf_token %}
     <h1><input name="username" type="text" size=40 placeholder="Login"/></h1>
     <h1><input name="password" type="password" size=40 placeholder="Password"/></h1>
-    {% if not request.user.is_authenticated and request.method == "POST" %}
-        <div>Invalid login or password!</div>
-    {% endif %}
     <label for="server">Server:</label>
     <select name="server" id="server">
         <option value="MyServer">MyServer</option>
@@ -16,6 +13,9 @@
     <br/>
     <br/>
     <button class="button" type="submit"> Sign In </button>
+    {% if not request.user.is_authenticated and request.method == "POST" %}
+        <p style="color:#cc1111">Invalid login or password!</p>
+    {% endif %}
 </form>
 
 {% endblock %}

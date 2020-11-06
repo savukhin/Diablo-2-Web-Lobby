@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"strings"
 
 	"fmt"
 	"reflect"
@@ -25,7 +26,7 @@ type pvpgn_bnet struct {
 	Username                 string
 	Acct_userid              NullInt64
 	Acct_passhash1           string
-	Acct_email               string
+	Acct_email               NullString
 	Auth_admin               NullString
 	Auth_normallogin         NullString
 	Auth_changepass          NullString
@@ -40,11 +41,11 @@ type pvpgn_bnet struct {
 	Auth_mutetime            NullInt64
 	Auth_mutereason          NullString
 	Auth_command_groups      NullString
-	Acct_lastlogin_time      int
-	Acct_lastlogin_owner     string
-	Acct_lastlogin_clienttag string
-	Acct_lastlogin_ip        string
-	Acct_ctime               string
+	Acct_lastlogin_time      NullInt64
+	Acct_lastlogin_owner     NullString
+	Acct_lastlogin_clienttag NullString
+	Acct_lastlogin_ip        NullString
+	Acct_ctime               NullString
 }
 
 type User struct {
@@ -149,7 +150,51 @@ func getUserFromDataBase(username string) (User, error) {
 	}
 	defer rows.Close()
 
-	final_user := User{user.Acct_passhash1, user.Acct_email, user.Username, user.Acct_lastlogin_ip, user.Acct_lastlogin_clienttag, user.Acct_lastlogin_owner,
-		user.Acct_lastlogin_time, user.Uid, user.Acct_ctime}
+	final_user := User{user.Acct_passhash1, user.Acct_email.String, user.Username, user.Acct_lastlogin_ip.String, user.Acct_lastlogin_clienttag.String, user.Acct_lastlogin_owner.String,
+		int(user.Acct_lastlogin_time.Int64), user.Uid, user.Acct_ctime.String}
 	return final_user, err
+}
+
+func registerUserInDataBase(username string, passhash string, email string) (User, error) {
+	rows, _ := db.Query("SELECT COUNT(*) FROM " + prefix + "bnet;")
+	rows.Next()
+	newid := 0
+	err := rows.Scan(&newid)
+	if err != nil {
+		return User{}, err
+	}
+	sqlStatement := `
+	INSERT INTO ` + prefix + `bnet (uid, acct_username, username, acct_userid, acct_passhash1, acct_email, auth_admin, auth_normallogin, auth_changepass, auth_changeprofile, auth_botlogin,	
+		auth_operator, new_at_team_flag, auth_lock, auth_locktime, auth_lockreason, auth_mute, auth_mutetime, auth_mutereason, auth_command_groups, acct_lastlogin_time, acct_lastlogin_owner,
+		acct_lastlogin_clienttag, acct_lastlogin_ip, acct_ctime)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)`
+
+	_, err = db.Exec(sqlStatement, newid,
+		username,
+		strings.ToLower(username),
+		newid,
+		passhash,
+		email,
+		"false",
+		"true",
+		"true",
+		"true",
+		"false",
+		"false",
+		0,
+		"false",
+		0,
+		nil,
+		"false",
+		0,
+		nil,
+		"1",
+		0,
+		"Panky",
+		"D2XP",
+		"192.168.1.14",
+		"0")
+
+	user, _ := getUserFromDataBase(username)
+	return user, err
 }
