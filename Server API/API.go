@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	_ "github.com/lib/pq"
 )
@@ -79,6 +80,11 @@ func getCharactersFromUserView(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func checkLogin(username string, passhash string) bool {
+	user, _ := getUser(username)
+	return passhash == user.Passhash1
+}
+
 func checkLoginView(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		if err := r.ParseForm(); err != nil {
@@ -88,8 +94,7 @@ func checkLoginView(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Post from website! r.PostFrom = %v\n", r.PostForm)
 		username := r.FormValue("username")
 		passhash := r.FormValue("passhash")
-		user, _ := getUser(username)
-		if passhash == user.Passhash1 {
+		if checkLogin(username, passhash) {
 			fmt.Fprintln(w, "OK")
 		} else {
 			fmt.Fprintln(w, "Error login rejected")
@@ -128,6 +133,48 @@ func registerView(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func createCharacterView(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		if err := r.ParseForm(); err != nil {
+			fmt.Fprintf(w, "Error in ParseForm() ", err)
+			fmt.Println("LOL")
+			return
+		}
+		username := r.FormValue("username")
+		passhash := r.FormValue("passhash")
+		if !checkLogin(username, passhash) {
+			fmt.Println("HaHA")
+			fmt.Fprintln(w, "Error login rejected")
+			return
+		}
+
+		charname := r.FormValue("charname")
+		characterClass := r.FormValue("characterClass")
+		char, err := createCharacterInFile(strings.ToLower(username), strings.ToLower(charname), characterClass)
+		fmt.Println("Did")
+		if err == nil {
+			fmt.Println("OK")
+			ans, err := json.Marshal(char)
+			if err != nil {
+				fmt.Fprintf(w, "Error while parsing ", err)
+				return
+			}
+			fmt.Fprintln(w, string(ans))
+		} else {
+			if err.Error() == "Character name is taken" {
+				fmt.Println("Taken")
+				fmt.Fprintln(w, err)
+			} else {
+				fmt.Println("OTher err")
+				fmt.Fprintln(w, "Error ", err)
+			}
+		}
+	} else {
+		fmt.Fprintln(w, "Error must be POST request but this is", r.Method)
+		fmt.Println("HERE")
+	}
+}
+
 func getStatusView(w http.ResponseWriter, r *http.Request) {
 	ans, err := getStatus()
 	if err != nil {
@@ -151,8 +198,6 @@ func favicon(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	println("qwer")
-	print("qwer")
 	fmt.Println("Starting app...")
 	if fileMode != "Plain" {
 		fmt.Println("Connecting to database...")
@@ -163,7 +208,7 @@ func main() {
 		fmt.Println("Connected to database!")
 	}
 	fmt.Println("Starting API...")
-	http.HandleFunc("/favicon.ico", favicon)
+	http.HandleFunc("/favicon.ico", favicon) //IDK why but python ask for this in every request
 	http.HandleFunc("/getCharacter/", getCharacterView)
 	http.HandleFunc("/getLadder/", getLadderView)
 	http.HandleFunc("/getStatus/", getStatusView)
@@ -172,6 +217,7 @@ func main() {
 	http.HandleFunc("/getCharactersFromUser/", getCharactersFromUserView)
 	http.HandleFunc("/checkLogin", checkLoginView)
 	http.HandleFunc("/register", registerView)
+	http.HandleFunc("/createCharacter", createCharacterView)
 	fmt.Println("Started")
 	err := http.ListenAndServe(":6110", nil)
 	if err != nil {

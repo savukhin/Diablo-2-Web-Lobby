@@ -13,7 +13,7 @@
         <label for="Amazon"> Amazon </label>
         <input type="radio" name="characterClass" id="Sorceress" value="Sorceress">
         <label for="Sorceress"> Sorceress </label>
-        <input type="radio" name="characterClass" id="Necromancer" value="Necromancer">
+        <input  type="radio" name="characterClass" id="Necromancer" value="Necromancer">
         <label for="Necromancer"> Necromancer </label>
         <input type="radio" name="characterClass" id="Paladin" value="Paladin">
         <label for="Paladin"> Paladin </label>
@@ -28,6 +28,7 @@
     {% if form.errors and request.method == 'POST'%}
     <p> {{ form.errors }} </p>
     {% endif %}
+    {{ error }}
 
     <button class="button" type="submit"> Create </button>
 </form>

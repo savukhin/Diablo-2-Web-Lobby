@@ -1,5 +1,5 @@
 package main
 
 const (
-	fileMode = "Database" //Plain, Database
+	fileMode = "DataBase" //Plain, Database
 )
