@@ -135,7 +135,6 @@ func createCharInfo(username string, charname string, characterClass string) err
 		}
 		w = append(w, bs[0])
 	}
-	fmt.Println(5)
 	//Add info about character class
 	w[188] = byte(characterClassCodes[characterClass])
 	os.Mkdir(folder, 0644)
@@ -268,20 +267,16 @@ func createCharSave(username string, charname string, characterClass string) err
 }
 
 func createCharacterInFile(username string, charname string, characterClass string) (*d2s.Character, error) {
-	fmt.Println(username, charname, characterClass)
 	if char, err := getCharacterFromFile(charname); err == nil {
 		return char, errors.New("Character name is taken")
 	}
-	fmt.Println("INFO")
 	err := createCharInfo(username, charname, characterClass)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("SAVE")
 	err = createCharSave(username, charname, characterClass)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("RETURN")
 	return getCharacterFromFile(charname)
 }

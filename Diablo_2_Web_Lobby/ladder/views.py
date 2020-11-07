@@ -1,29 +1,9 @@
 from django.shortcuts import render
 from ladder.LadderParser import parseLadder
 import urllib.request, json
-from Diablo_2_Web_Lobby.servers import servers
+from Diablo_2_Web_Lobby.servers import servers, getLadder
 from character.models import Character
 # Create your views here.
-
-
-def getLadder(server, diabloVersion, hardcoreMode):
-    fp = urllib.request.urlopen("http://" + server + "/getLadder")
-    mystr = (fp.read()).decode("utf-8")
-    fp.close()
-    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
-        return "ERROR"
-    ladder = json.loads(mystr)
-
-    if diabloVersion not in ladder.keys():
-        return {}
-
-    confirmedLadder = []
-    for char in ladder[diabloVersion]:
-        if char['hc'] == hardcoreMode:
-            confirmedLadder.append(char)
-            #if Character.objects.filter(name=char['charname']):
-            #    confirmedLadder.append(char)
-    return confirmedLadder
 
 
 def ladderNorStandard(request):

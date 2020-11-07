@@ -3,12 +3,8 @@ from django.contrib.auth import authenticate, login, logout
 from authentication.models import CustomUser, PvpgnBnet
 from authentication.forms import FormReg
 from django.contrib.auth.models import User
-from Diablo_2_Web_Lobby.servers import servers
-from character.models import Character
-import urllib.request, json
-import requests
+from Diablo_2_Web_Lobby.servers import servers, getCharacter, checkLogin, register, getCharactersFromUser
 from authentication.forms import ChangeAvatarForm
-from authentication.passhash import makeHash
 
 # Create your views here.
 
@@ -18,34 +14,11 @@ def createPvPGNProfile(name, password, email, isAdmin="false"):
     return newProfile
 
 
-def checkLogin(server, username, password):
-    response = requests.post("http://" + server + "/checkLogin", data={'username': username,
-                                                                       "passhash": makeHash(password)})
-    mystr = response.text
-    response.close()
-    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
-        return False
-    return True
-
-def register(server, username, password, email):
-    response = requests.post("http://" + server + "/register", data={'username': username,
-                                                                     "passhash": makeHash(password),
-                                                                     'email': email})
-    mystr = response.text
-    response.close()
-    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
-        return False
-    elif mystr[0] == 'U':
-        return "Username is taken"
-
-    return True
-
 #View for Log in (sign in)
 def signIn(request):
     if request.method == 'POST': #If 'submit' button has been pressed then try to authenticate
 
         if checkLogin(servers[request.POST['server']], request.POST['username'], request.POST['password']):
-
             user = authenticate(username=request.POST['username'], password=request.POST['password'])
             if user is not None: #If Django found a user then login
                 login(request, user)
@@ -93,16 +66,26 @@ def signOut(request):
 
 #View for profile displaying
 def profile(request, id):
+    class CharacterForm:
+        def __init__(self):
+            self.photo = ""
+            self.name = ""
     djangoUser = User.objects.get(id=id)
     customUser = CustomUser.objects.get(user_id=djangoUser.id)
     #characters = Character.objects.filter(player_id=customUser.id)
-    fp = urllib.request.urlopen("http://" + servers[request.path.split("/")[1]] + "/getCharactersFromUser/" + customUser.user.username)
-    mystr = (fp.read()).decode("utf-8")
-    fp.close()
-    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
-        return "ERROR"
-    characters = mystr.split("\n")[:-1]
-    print(characters)
+
+    characters = getCharactersFromUser(servers[request.path.split("/")[1]], customUser.user.username)
+    characters_final = []
+    for character in characters:
+        try:
+            q = getCharacter(servers[request.path.split("/")[1]], character)
+            q['header']['class']
+            characters_final.append(CharacterForm())
+            characters_final[-1].name = character
+            characters_final[-1].photo = "img/CharacterIcons/" + q['header']['class'] + "Icon.png"
+        except:
+            pass
+
     if request.method == "POST":
         form = ChangeAvatarForm(request.POST, request.FILES)
         if form.is_valid():
@@ -112,5 +95,5 @@ def profile(request, id):
             return redirect('/profile/' + str(id))
 
     return render(request, template_name='profile.html',
-                  context={'request': request,'profile': customUser, 'characters': characters,
+                  context={'request': request,'profile': customUser, 'characters': characters_final,
                            'form': ChangeAvatarForm()})

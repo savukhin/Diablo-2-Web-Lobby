@@ -137,13 +137,11 @@ func createCharacterView(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		if err := r.ParseForm(); err != nil {
 			fmt.Fprintf(w, "Error in ParseForm() ", err)
-			fmt.Println("LOL")
 			return
 		}
 		username := r.FormValue("username")
 		passhash := r.FormValue("passhash")
 		if !checkLogin(username, passhash) {
-			fmt.Println("HaHA")
 			fmt.Fprintln(w, "Error login rejected")
 			return
 		}
@@ -151,9 +149,7 @@ func createCharacterView(w http.ResponseWriter, r *http.Request) {
 		charname := r.FormValue("charname")
 		characterClass := r.FormValue("characterClass")
 		char, err := createCharacterInFile(strings.ToLower(username), strings.ToLower(charname), characterClass)
-		fmt.Println("Did")
 		if err == nil {
-			fmt.Println("OK")
 			ans, err := json.Marshal(char)
 			if err != nil {
 				fmt.Fprintf(w, "Error while parsing ", err)
@@ -162,16 +158,13 @@ func createCharacterView(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintln(w, string(ans))
 		} else {
 			if err.Error() == "Character name is taken" {
-				fmt.Println("Taken")
 				fmt.Fprintln(w, err)
 			} else {
-				fmt.Println("OTher err")
 				fmt.Fprintln(w, "Error ", err)
 			}
 		}
 	} else {
 		fmt.Fprintln(w, "Error must be POST request but this is", r.Method)
-		fmt.Println("HERE")
 	}
 }
 

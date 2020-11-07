@@ -18,10 +18,10 @@
     <input class="button" type="submit" value="Sign Up">
 
     {% if form.errors %}
-    <div style="color:#cc1111" class="alert alert-danger" role="alert">{{ form.errors }}</div>
+    <div class="warning-text" role="alert">{{ form.errors }}</div>
     {% endif %}
 
-    <p style="color:#cc1111">{{ error }}</p>
+    <p class="warning-text">{{ error }}</p>
 
 
 </form>

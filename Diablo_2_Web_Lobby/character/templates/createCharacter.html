@@ -28,7 +28,7 @@
     {% if form.errors and request.method == 'POST'%}
     <p> {{ form.errors }} </p>
     {% endif %}
-    {{ error }}
+    <p class="warning-text">{{ error }}</p>
 
     <button class="button" type="submit"> Create </button>
 </form>

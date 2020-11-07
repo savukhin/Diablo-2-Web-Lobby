@@ -1,6 +1,5 @@
 from django.shortcuts import render
-from Diablo_2_Web_Lobby.servers import servers
-import urllib.request, json
+from Diablo_2_Web_Lobby.servers import servers, getStatus
 
 # Create your views here.
 
@@ -12,14 +11,6 @@ class Server:
         self.runningCountOfUsers = 0
 
 
-def getStatus(server):
-    fp = urllib.request.urlopen("http://" + server + "/getStatus/")
-    mystr = (fp.read()).decode("utf-8")
-    fp.close()
-    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
-        return "ERROR"
-    info = json.loads(mystr)
-    return info
 
 
 def index(request):

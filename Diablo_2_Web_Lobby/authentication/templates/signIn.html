@@ -14,7 +14,7 @@
     <br/>
     <button class="button" type="submit"> Sign In </button>
     {% if not request.user.is_authenticated and request.method == "POST" %}
-        <p style="color:#cc1111">Invalid login or password!</p>
+        <p class="warning-text">Invalid login or password!</p>
     {% endif %}
 </form>
 

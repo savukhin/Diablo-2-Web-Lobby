@@ -32,9 +32,10 @@
 
 
     .button {
-        background-color: #111111;
-        border: solid #990000;
-        color: white;
+        background-color: #e;
+        //border: 1px solid #990000;
+        border: 1px solid #111;
+        color: black;
         padding: 15px 32px;
         text-align: center;
         text-decoration: none;
@@ -42,12 +43,14 @@
         font-size: 16px;
         margin: 4px 2px;
         cursor: pointer;
+        box-shadow: -1px 2px 3px 0px rgba(0,0,0,0.3);
+        border-radius: 2px;
     }
 
     .button:hover {
-        background-color: #aa1111;
-        border: solid #111111;
-        border-radius: 5%;
+        background-color: #ff4444;
+        border: 1px solid #111111;
+        border-radius: 4px;
     }
 
     .dropdown {
@@ -85,6 +88,13 @@
         width: 500px;
         padding: 20px;
         box-shadow: 0px 4px 10px 0px rgba(0,0,0,0.4);
+    }
+
+    .warning-text {
+        color: #cc1111;
+        font-size: 20px;
+        letter-spacing: 2px;
+        font-family: "Tahoma";
     }
 
         {% block styles %} {% endblock %}

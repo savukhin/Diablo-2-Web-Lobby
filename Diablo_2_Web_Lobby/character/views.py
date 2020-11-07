@@ -3,28 +3,12 @@ from django.http import HttpResponse
 from character.forms import CharacterCreateForm
 from character.models import Character
 from authentication.models import CustomUser
-from Diablo_2_Web_Lobby.servers import servers
+from Diablo_2_Web_Lobby.servers import servers, createChar, getCharacter
 from character.PvPGNCharacter import createPvPGNCharacter
 from authentication.models import PvpgnBnet
 import urllib.request, json
-import requests
 # Create your views here.
 
-
-def createChar(server, username, passhash, charname, characterClass):
-    response = requests.post("http://" + server + "/createCharacter", data={'username': username,
-                                                                     'passhash': passhash,
-                                                                     'charname': charname,
-                                                                     "characterClass": characterClass
-                                                                     })
-    mystr = response.text
-    response.close()
-    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
-        return False
-    elif mystr[0] == 'C':
-        return "Character name is taken"
-
-    return True
 
 def createCharacter(request):
     #If 'submit' button pressed
@@ -41,7 +25,6 @@ def createCharacter(request):
             newCharacter.save()
             '''
             pvpgn_user = PvpgnBnet.objects.get(username=request.user.username)
-            print(pvpgn_user.acct_passhash1)
             response = createChar(servers[request.path.split('/')[1]], pvpgn_user.username, pvpgn_user.acct_passhash1,
                                   request.POST['name'], request.POST['characterClass'])
             if (response == "Character name is taken"):
@@ -51,16 +34,6 @@ def createCharacter(request):
         return render(request, template_name='createCharacter.html', context={'form': characterForm})
 
     return render(request, template_name='createCharacter.html')
-
-
-def getCharacter(server, name):
-    fp = urllib.request.urlopen("http://" + server + "/getCharacter/" + name)
-    mystr = (fp.read()).decode("utf-8")
-    fp.close()
-    if mystr[0] == 'E': #That means the word is Error (not a start of the json)
-        return "ERROR"
-    info = json.loads(mystr)
-    return info
 
 
 def showCharacter(request, name):
