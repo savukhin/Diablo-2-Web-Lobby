@@ -97,3 +97,33 @@ def getStatus(server):
         return "ERROR"
     info = json.loads(mystr)
     return info
+
+#Games
+def getGameList(server):
+    fp = urllib.request.urlopen("http://" + server + "/getGamelist/")
+    mystr = (fp.read()).decode("utf-8")
+    fp.close()
+    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
+        return "ERROR"
+    info = json.loads(mystr)
+    return info
+
+
+def getGameInfoById(server, id):
+    fp = urllib.request.urlopen("http://" + server + "/getGameInfoById/" + id)
+    mystr = (fp.read()).decode("utf-8")
+    fp.close()
+    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
+        return "ERROR"
+    info = json.loads(mystr)
+    return info
+
+
+def getGameInfoFromCharacter(server, charname):
+    fp = urllib.request.urlopen("http://" + server + "/getGameInfoFromCharacter/" + charname)
+    mystr = (fp.read()).decode("utf-8")
+    fp.close()
+    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
+        return "ERROR"
+    info = json.loads(mystr)
+    return info

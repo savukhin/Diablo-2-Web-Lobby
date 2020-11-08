@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from character.forms import CharacterCreateForm
 from character.models import Character
 from authentication.models import CustomUser
-from Diablo_2_Web_Lobby.servers import servers, createChar, getCharacter
+from Diablo_2_Web_Lobby.servers import servers, createChar, getCharacter, getGameInfoFromCharacter
 from character.PvPGNCharacter import createPvPGNCharacter
 from authentication.models import PvpgnBnet
 import urllib.request, json
@@ -37,10 +37,13 @@ def createCharacter(request):
 
 
 def showCharacter(request, name):
-    character = getCharacter(servers[request.path.split('/')[1]], name)
+    server = servers[request.path.split('/')[1]]
+    character = getCharacter(server, name)
     if (character == "ERROR"):
         return redirect(request.META.get('HTTP_REFERER'))
 
+    game = getGameInfoFromCharacter(server, name)
     return render(request, template_name='character.html',
                   context={'character': character,
-                           'character_dumps': json.dumps(character)})
+                           'character_dumps': json.dumps(character),
+                           'game' : game})

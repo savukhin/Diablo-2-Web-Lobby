@@ -195,6 +195,11 @@
         </div>
     </div>
     <div class="block">
+        {% if game != "ERROR" %}
+            <p class="online-text">Playing now in "{{ game.GameName }}" game with {{ game.UserCount }} players</p>
+        {% else %}
+            <p class="warning-text">Offline</p>
+        {% endif %}
         <div style="line-height: 20%">
             <h2> Skills </h2>
             {% for skill in character.skills %}

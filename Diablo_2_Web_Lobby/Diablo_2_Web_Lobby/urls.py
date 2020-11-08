@@ -26,7 +26,7 @@ urlpatterns = [
     path('', include('dialogues.urls')),
     path('', include('ladder.urls')),
 
-    path('MyServer/', include('main.urls')),
+#    path('MyServer/', include('main.urls')),
     path('MyServer/', include('authentication.urls')),
     path('MyServer/', include('lobby.urls')),
     path('MyServer/', include('character.urls')),

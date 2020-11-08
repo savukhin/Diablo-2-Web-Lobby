@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+
+    .grid-container {
+        width: 1050px;
+        display: grid;
+        grid-template-columns: 25% 25% 25% 25%;
+        grid-gap:0px;
+    }
+
+    .header-block {
+        width:auto;
+    }
+
+    .game-block {
+        width:auto;
+        border: 1px solid;
+        padding: 20px 0px;
+        box-shadow: 0px 3px 4px 0px rgba(0,0,0,0.4);
+    }
+
+    .game-block:hover {
+        background-color: rgba(200,200,200,0.4);
+        border: 1px solid rgba(150,10,10,0.4);
+    }
+
+
+    .game-block .dropdown-content {
+        background-color: rgba(255, 80, 80, 0.8);
+    }
+
+    .dropdown-element {
+        color: black;
+        text-decoration: none;
+        font-size: 17px;
+        border: 1px solid #111;
+        padding: 1px 10px;
+        cursor:pointer;
+    }
+    .dropdown-element:hover {
+        background-color: #f00;
+    }
+
+
+{% endblock %}
+
+{% block content %}
+
+<h1>D2Sats Main Page</h1>
+<p>Welcome to <em>D2Stats</em></p>
+<h2>See statistics of Diablo 2 Servers!</h2>
+
+<div class="block" style="width:1000px">
+    <div class="grid-container header-block">
+        <div>ID</div>
+        <div>Game Name</div>
+        <div>Users playing now</div>
+        <div>Difficulty</div>
+    </div>
+    <br>
+
+    {% for game in gamelist %}
+        <div style="height: 10px" class="grid-container game-block dropdown">
+            <div> {{ game.GameID }} </div>
+            <div> {{ game.GameName }} </div>
+            <div> {{ game.UserCount }} </div>
+            <div> {{ game.Difficulty }}</div>
+
+            <div class="dropdown-content">
+                <p style="padding: 1px; font-size: 13px">characters:</p>
+                {% for user in game.Users %}
+                <a href="{% url 'character armory' user.Charname %}"><div class="dropdown-element"><p>{{user.Charname}}</p></div></a>
+                {% endfor %}
+            </div>
+
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

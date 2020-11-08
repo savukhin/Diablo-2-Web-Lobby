@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -9,9 +11,28 @@ import (
 	"github.com/reiver/go-telnet"
 )
 
+func D2GSQuery(query string) []string {
+	conn, _ := telnet.DialTo(D2GSAddress)
+	conn.Write([]byte(D2GSPassword + "\n"))
+	telnetReadUntil(">", conn)
+	conn.Write([]byte(query + "\n"))
+	answer := strings.Split(telnetReadUntil(">", conn), "\n")
+	return answer[1 : len(answer)-1]
+}
+
+func telnetReadUntil(symbol string, conn *telnet.Conn) string {
+	bs := make([]byte, 1)
+	s := ""
+	for string(bs) != ">" {
+		conn.Read(bs)
+		s += string(bs)
+	}
+	return s
+}
+
 func getGames() ([][]byte, error) {
-	conn, err := telnet.DialTo("127.0.0.1:8888")
-	conn.Write([]byte("abcd123\n"))
+	conn, err := telnet.DialTo(D2GSAddress)
+	conn.Write([]byte(D2GSPassword + "\n"))
 	telnetReadUntil(">", conn)
 	conn.Write([]byte("gl\n"))
 	answer := telnetReadUntil(">", conn)
@@ -21,12 +42,14 @@ func getGames() ([][]byte, error) {
 	return games, err
 }
 
-func getGamelist() ([][]byte, error) {
+func getGamelist() ([]byte, error) {
 	games, err := getGames()
 	if err != nil {
-		return [][]byte{}, err
+		fmt.Println("Why?..")
+		return []byte{}, err
 	}
-	var ans [][]byte
+
+	ans := []map[string]string{}
 	for i := range games {
 		var raw []string
 		for _, val := range strings.Split(string(games[i])[1:len(games[i])-1], " ") {
@@ -57,28 +80,20 @@ func getGamelist() ([][]byte, error) {
 			game["CreateTime"] = raw[9]
 			game["Disable"] = raw[10]
 		}
-		jsonString, err := json.Marshal(game)
-		if err != nil {
-			return [][]byte{}, err
-		}
-		ans = append(ans, jsonString)
-	}
-	return ans, err
-}
 
-func telnetReadUntil(symbol string, conn *telnet.Conn) string {
-	bs := make([]byte, 1)
-	s := ""
-	for string(bs) != ">" {
-		conn.Read(bs)
-		s += string(bs)
+		ans = append(ans, game)
 	}
-	return s
+
+	jsonString, err := json.Marshal(ans)
+	if err != nil {
+		return []byte{}, err
+	}
+	return jsonString, err
 }
 
 func getStatus() ([]byte, error) {
-	conn, _ := telnet.DialTo("127.0.0.1:8888")
-	conn.Write([]byte("abcd123\n"))
+	conn, _ := telnet.DialTo(D2GSAddress)
+	conn.Write([]byte(D2GSPassword + "\n"))
 	telnetReadUntil(">", conn)
 	conn.Write([]byte("status\n"))
 	answer := strings.Split(telnetReadUntil(">", conn), "\n")
@@ -95,4 +110,97 @@ func getStatus() ([]byte, error) {
 
 	jsonString, err := json.Marshal(res)
 	return jsonString, err
+}
+
+type GameInfo struct {
+	GameName    string
+	GamePass    string
+	GameDesc    string
+	GameID      int
+	GameVer     string
+	GameType    string
+	Difficulty  string
+	IsLadder    string
+	UserCount   int
+	CreateTime  string
+	Disable     string
+	CreatorAcct string
+	CreatorChar string
+	CreatorIP   string
+	Users       []map[string]string
+}
+
+func parseRawGameInfo(response []string) ([]byte, error) {
+	if len(response) < 6 {
+		return nil, errors.New("Game not found")
+	}
+
+	game := map[string]string{}
+	gameInfoRegexp := regexp.MustCompile(`\[[^\[]*\]`)
+	for i := 1; i < 6; i++ {
+		temp := gameInfoRegexp.FindAll([]byte(response[i]), -1)
+		for _, value := range temp {
+			field, data := "", ""
+			j := 1
+			for ; value[j] != ':'; j++ {
+				if value[j] != ' ' {
+					field = field + string(value[j])
+				}
+			}
+			j++
+			for ; value[j] != ']'; j++ {
+				if value[j] != ' ' {
+					data = data + string(value[j])
+				}
+			}
+			if field != "" {
+				game[field] = data
+			}
+		}
+	}
+
+	charactersInfo := []map[string]string{}
+	columnTitles := []string{"No", "AcctName", "Charname", "IPAddress", "Class", "Level", "EnterTime"}
+
+	for i := 8; response[i][0] != '+'; i++ {
+		line := response[i]
+		charactersInfo = append(charactersInfo, map[string]string{})
+		word := true
+		data := ""
+		column := 0
+		for j := 2; line[j] != '|'; j++ {
+			if line[j] == ' ' && word {
+				charactersInfo[i-8][columnTitles[column]] = data
+				data = ""
+				column++
+				word = false
+			} else if line[j] != ' ' {
+				if !word {
+					word = true
+				}
+				data = data + string(line[j])
+			}
+		}
+	}
+	userCount, _ := strconv.Atoi(game["UserCount"])
+	gameID, _ := strconv.Atoi(game["GameID"])
+	gameInfo := GameInfo{game["GameName"], game["GamePass"], game["GameDesc"], gameID, game["GameVer"], game["GameType"], game["Difficult"],
+		game["IsLadder"], userCount, game["CreateTime"], game["Disable"], game["CreatorAcct"], game["CreatorChar"], game["CreatorIP"], charactersInfo}
+
+	gameInfoString, err := json.Marshal(gameInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	return gameInfoString, nil
+}
+
+func getGameInfoFromCharacter(charname string) ([]byte, error) {
+	response := D2GSQuery("char " + charname)
+	return parseRawGameInfo(response)
+}
+
+func getGameInfoById(id int) ([]byte, error) {
+	response := D2GSQuery("cl " + strconv.Itoa(id))
+	return parseRawGameInfo(response)
 }

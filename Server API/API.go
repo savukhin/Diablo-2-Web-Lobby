@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	_ "github.com/lib/pq"
@@ -181,9 +182,31 @@ func getGamelistView(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Fprintln(w, "Error while parsing status json", err)
 	}
-	for game := range ans {
-		fmt.Fprintln(w, string(game))
+	fmt.Fprintln(w, string(ans))
+}
+
+func getGameInfoFromCharacterView(w http.ResponseWriter, r *http.Request) {
+	charname := r.URL.Path[len("/getGameInfoFromCharacter/"):]
+	gameInfo, err := getGameInfoFromCharacter(charname)
+	if err != nil {
+		fmt.Fprintln(w, "Error ", err)
 	}
+
+	fmt.Fprintln(w, string(gameInfo))
+}
+
+func getGameInfoByIdView(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.URL.Path[len("/getGameInfoById/"):])
+	if err != nil {
+		fmt.Fprintln(w, "Error ", err)
+		return
+	}
+	gameInfo, err := getGameInfoById(id)
+	if err != nil {
+		fmt.Fprintln(w, "Error ", err)
+	}
+
+	fmt.Fprintln(w, string(gameInfo))
 }
 
 func favicon(w http.ResponseWriter, r *http.Request) {
@@ -211,6 +234,8 @@ func main() {
 	http.HandleFunc("/checkLogin", checkLoginView)
 	http.HandleFunc("/register", registerView)
 	http.HandleFunc("/createCharacter", createCharacterView)
+	http.HandleFunc("/getGameInfoFromCharacter/", getGameInfoFromCharacterView)
+	http.HandleFunc("/getGameInfoById/", getGameInfoByIdView)
 	fmt.Println("Started")
 	err := http.ListenAndServe(":6110", nil)
 	if err != nil {

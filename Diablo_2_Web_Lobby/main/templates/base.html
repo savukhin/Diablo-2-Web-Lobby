@@ -67,7 +67,12 @@
     .dropdown:hover .dropdown-content {
         display: block;
     }
+    .dropdown-content a {
+        text-decoration: none;
+    }
     .dropdown-element {
+        color: white;
+        text-decoration: none;
         font-size: 20px;
         border: 1px solid #111;
         padding: 1px 10px;
@@ -96,6 +101,12 @@
         letter-spacing: 2px;
         font-family: "Tahoma";
     }
+    .online-text {
+        color: #11bb11;
+        font-size: 20px;
+        letter-spacing: 2px;
+        font-family: "Tahoma";
+    }
 
         {% block styles %} {% endblock %}
     </style>
@@ -117,7 +128,7 @@
     <div class="dropdown header-element">
         <a style="text-decoration: none; color: #ffffff" href="{% url 'index' %}"> Servers </a>
         <div class="dropdown-content">
-            <a><div class="dropdown-element"><p>First server</p></div></a>
+            <a href="{% url 'serverInfo' 'MyServer'%}"><div class="dropdown-element"><p>My Server</p></div></a>
             <a><div class="dropdown-element"><p>Second server</p></div></a>
         </div>
     </div>
