@@ -76,7 +76,7 @@ class PvpgnBnet(models.Model):
 class CustomUser(models.Model):
     user = models.OneToOneField(verbose_name="Реальный пользователь", to=User, on_delete=models.CASCADE,
                                 related_name="customUser")
-    pvpgn_user = models.OneToOneField(verbose_name="Пользователь PvPGN", to=PvpgnBnet, on_delete=models.CASCADE,
-                                      related_name="customUser")
+    username = models.CharField(unique=True, max_length=32, blank=False, null=False)
     photo = models.ImageField(verbose_name="Аватар пользователя", upload_to='Avatars',
                               default='Avatars/blankAvatar/blankAvatar.png')
+    server = models.CharField(max_length=100, blank=False, null=False)

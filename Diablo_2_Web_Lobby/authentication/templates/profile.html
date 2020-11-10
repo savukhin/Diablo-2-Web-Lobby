@@ -38,13 +38,14 @@ label {
                 <a href="{% url 'dialogue' profile.user.id %}"><button class="button">Write message</button></a>
             {% endif %}
         </div>
+        <h1> server: {{ profile.server }} </h1>
     </div>
     <div class="block">
-        <h1> {{ profile.user.username }}</h1>
+        <h1> {{ profile.username }} </h1>
         <div>
             <h2> Characters: </h2>
             {% for character in characters %}
-            <a style="display:block; display:grid; grid-template-columns: 90px auto;" class="button character-button" href="{% url 'character armory' character.name %}">
+            <a style="display:block; display:grid; grid-template-columns: 90px auto;" class="button character-button" href="{% url 'character armory' profile.server character.name %}">
                 <img style="display:inline-block" src="{% static character.photo %}">
                 <p style="display:inline-block"> <br>{{ character.name }} </p>
             </a>

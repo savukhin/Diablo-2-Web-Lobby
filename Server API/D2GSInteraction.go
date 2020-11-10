@@ -42,11 +42,11 @@ func getGames() ([][]byte, error) {
 	return games, err
 }
 
-func getGamelist() ([]byte, error) {
+func getGamelist() (*[]map[string]string, error) {
 	games, err := getGames()
 	if err != nil {
 		fmt.Println("Why?..")
-		return []byte{}, err
+		return nil, err
 	}
 
 	ans := []map[string]string{}
@@ -84,11 +84,11 @@ func getGamelist() ([]byte, error) {
 		ans = append(ans, game)
 	}
 
-	jsonString, err := json.Marshal(ans)
+	/*jsonString, err := json.Marshal(ans)
 	if err != nil {
 		return []byte{}, err
-	}
-	return jsonString, err
+	}*/
+	return &ans, err
 }
 
 func getStatus() ([]byte, error) {
@@ -130,7 +130,7 @@ type GameInfo struct {
 	Users       []map[string]string
 }
 
-func parseRawGameInfo(response []string) ([]byte, error) {
+func parseRawGameInfo(response []string) (*GameInfo, error) {
 	if len(response) < 6 {
 		return nil, errors.New("Game not found")
 	}
@@ -187,20 +187,15 @@ func parseRawGameInfo(response []string) ([]byte, error) {
 	gameInfo := GameInfo{game["GameName"], game["GamePass"], game["GameDesc"], gameID, game["GameVer"], game["GameType"], game["Difficult"],
 		game["IsLadder"], userCount, game["CreateTime"], game["Disable"], game["CreatorAcct"], game["CreatorChar"], game["CreatorIP"], charactersInfo}
 
-	gameInfoString, err := json.Marshal(gameInfo)
-	if err != nil {
-		return nil, err
-	}
-
-	return gameInfoString, nil
+	return &gameInfo, nil
 }
 
-func getGameInfoFromCharacter(charname string) ([]byte, error) {
+func getGameInfoFromCharacter(charname string) (*GameInfo, error) {
 	response := D2GSQuery("char " + charname)
 	return parseRawGameInfo(response)
 }
 
-func getGameInfoById(id int) ([]byte, error) {
+func getGameInfoById(id int) (*GameInfo, error) {
 	response := D2GSQuery("cl " + strconv.Itoa(id))
 	return parseRawGameInfo(response)
 }

@@ -2,215 +2,70 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
+	"net/url"
 	"strconv"
-	"strings"
+	"time"
 
 	_ "github.com/lib/pq"
+	"github.com/nokka/d2s"
 )
 
-func getUser(username string) (User, error) {
-	if fileMode == "DataBase" {
-		return getUserFromDataBase(username)
-	} else {
-		return getUserFromFile(username)
-	}
-}
-
-func registerUser(username string, passhash string, email string) (User, error) {
-	user, err := getUser(username)
-	if err == nil {
-		return user, errors.New("Username is taken")
-	}
-	if fileMode == "Plain" {
-		return registerUserInFile(username, passhash, email)
-	} else {
-		return registerUserInDataBase(username, passhash, email)
-	}
-}
-
-func getCharacterView(w http.ResponseWriter, r *http.Request) {
-	path := r.URL.Path[len("/getCharacter/"):]
-	char, err := getCharacterFromFile(path)
-	if err != nil {
-		fmt.Fprintf(w, "Error while opening character file ", err)
-		return
-	}
-	ans, err := json.Marshal(char)
-	fmt.Fprintln(w, string(ans))
-	if err != nil {
-		fmt.Fprintf(w, "Error while parsign character class  ", err)
-		return
-	}
-}
-
-func getLadderView(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, parseLadder())
-}
-
-func getUserView(w http.ResponseWriter, r *http.Request) {
-	username := r.URL.Path[len("/getUser/"):]
-	user, err := getUser(username)
-	if err != nil {
-		fmt.Fprintf(w, "Error finding user ", err)
-		return
-	}
-	ans, err := json.Marshal(user)
-	fmt.Fprintln(w, string(ans))
-	if err != nil {
-		fmt.Fprintf(w, "Error while parsing ", err)
-		return
-	}
-}
-
-func getCharactersFromUserView(w http.ResponseWriter, r *http.Request) {
-	username := r.URL.Path[len("/getCharactersFromUser/"):]
-	directory := "D:/PvPGN/Magic_Builder/release/var/charinfo/" + username + "/"
+func getAllCharacters() ([]byte, error) {
+	directory := pathToCharSaveFolder
 	files, err := ioutil.ReadDir(directory)
 	if err != nil {
-		fmt.Fprintln(w, "Error: user doesn't exists! ", err)
+		fmt.Println("Error while opening character dir")
+		return nil, err
 	}
+	var characters []*d2s.Character
 	for _, f := range files {
 		if !f.IsDir() {
-			fmt.Fprintln(w, f.Name())
-		}
-	}
-}
-
-func checkLogin(username string, passhash string) bool {
-	user, _ := getUser(username)
-	return passhash == user.Passhash1
-}
-
-func checkLoginView(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		if err := r.ParseForm(); err != nil {
-			fmt.Fprintf(w, "Error in ParseForm() ", err)
-			return
-		}
-		fmt.Fprintf(w, "Post from website! r.PostFrom = %v\n", r.PostForm)
-		username := r.FormValue("username")
-		passhash := r.FormValue("passhash")
-		if checkLogin(username, passhash) {
-			fmt.Fprintln(w, "OK")
-		} else {
-			fmt.Fprintln(w, "Error login rejected")
-		}
-	} else {
-		fmt.Fprintln(w, "Error must be POST request but this is", r.Method)
-	}
-}
-
-func registerView(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		if err := r.ParseForm(); err != nil {
-			fmt.Fprintf(w, "Error in ParseForm() ", err)
-			return
-		}
-		username := r.FormValue("username")
-		passhash := r.FormValue("passhash")
-		email := r.FormValue("email")
-		user, err := registerUser(username, passhash, email)
-		if err == nil {
-			ans, err := json.Marshal(user)
+			char, err := getCharacterFromFile(f.Name())
 			if err != nil {
-				fmt.Fprintf(w, "Error while parsing ", err)
-				return
-			}
-			fmt.Fprintln(w, string(ans))
-		} else {
-			if err.Error() == "Username is taken" {
-				fmt.Fprintln(w, err)
+				//fmt.Println("Error while parsing ", f.Name())
 			} else {
-				fmt.Fprintln(w, "Error ", err)
+				characters = append(characters, char)
 			}
 		}
+	}
+	answer, err := json.Marshal(characters)
+	return answer, nil
+}
+
+func getAllGames() ([]byte, error) {
+	gamelist, err := getGamelist()
+	if err != nil {
+		return nil, err
+	}
+	var gameInfos []GameInfo
+	for _, game := range *gamelist {
+		id, err := strconv.Atoi(game["ID"])
+		if err != nil {
+			continue
+		}
+		info, err := getGameInfoById(id)
+		if err != nil {
+			continue
+		}
+		gameInfos = append(gameInfos, *info)
+	}
+	jsonGameInfos, err := json.Marshal(gameInfos)
+	if err != nil {
+		return nil, err
+	}
+
+	return jsonGameInfos, nil
+}
+
+func getAllUsers() ([]byte, error) {
+	if fileMode == "Plain" {
+		return getAllUsersFromFile()
 	} else {
-		fmt.Fprintln(w, "Error must be POST request but this is", r.Method)
+		return getAllUsersFromDataBase()
 	}
-}
-
-func createCharacterView(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		if err := r.ParseForm(); err != nil {
-			fmt.Fprintf(w, "Error in ParseForm() ", err)
-			return
-		}
-		username := r.FormValue("username")
-		passhash := r.FormValue("passhash")
-		if !checkLogin(username, passhash) {
-			fmt.Fprintln(w, "Error login rejected")
-			return
-		}
-
-		charname := r.FormValue("charname")
-		characterClass := r.FormValue("characterClass")
-		char, err := createCharacterInFile(strings.ToLower(username), strings.ToLower(charname), characterClass)
-		if err == nil {
-			ans, err := json.Marshal(char)
-			if err != nil {
-				fmt.Fprintf(w, "Error while parsing ", err)
-				return
-			}
-			fmt.Fprintln(w, string(ans))
-		} else {
-			if err.Error() == "Character name is taken" {
-				fmt.Fprintln(w, err)
-			} else {
-				fmt.Fprintln(w, "Error ", err)
-			}
-		}
-	} else {
-		fmt.Fprintln(w, "Error must be POST request but this is", r.Method)
-	}
-}
-
-func getStatusView(w http.ResponseWriter, r *http.Request) {
-	ans, err := getStatus()
-	if err != nil {
-		fmt.Fprintln(w, "Error while parsing status json", err)
-	}
-	fmt.Fprintln(w, string(ans))
-}
-
-func getGamelistView(w http.ResponseWriter, r *http.Request) {
-	ans, err := getGamelist()
-	if err != nil {
-		fmt.Fprintln(w, "Error while parsing status json", err)
-	}
-	fmt.Fprintln(w, string(ans))
-}
-
-func getGameInfoFromCharacterView(w http.ResponseWriter, r *http.Request) {
-	charname := r.URL.Path[len("/getGameInfoFromCharacter/"):]
-	gameInfo, err := getGameInfoFromCharacter(charname)
-	if err != nil {
-		fmt.Fprintln(w, "Error ", err)
-	}
-
-	fmt.Fprintln(w, string(gameInfo))
-}
-
-func getGameInfoByIdView(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.URL.Path[len("/getGameInfoById/"):])
-	if err != nil {
-		fmt.Fprintln(w, "Error ", err)
-		return
-	}
-	gameInfo, err := getGameInfoById(id)
-	if err != nil {
-		fmt.Fprintln(w, "Error ", err)
-	}
-
-	fmt.Fprintln(w, string(gameInfo))
-}
-
-func favicon(w http.ResponseWriter, r *http.Request) {
-
 }
 
 func main() {
@@ -223,22 +78,103 @@ func main() {
 		}
 		fmt.Println("Connected to database!")
 	}
-	fmt.Println("Starting API...")
-	http.HandleFunc("/favicon.ico", favicon) //IDK why but python ask for this in every request
-	http.HandleFunc("/getCharacter/", getCharacterView)
-	http.HandleFunc("/getLadder/", getLadderView)
-	http.HandleFunc("/getStatus/", getStatusView)
-	http.HandleFunc("/getGamelist/", getGamelistView)
-	http.HandleFunc("/getUser/", getUserView)
-	http.HandleFunc("/getCharactersFromUser/", getCharactersFromUserView)
-	http.HandleFunc("/checkLogin", checkLoginView)
-	http.HandleFunc("/register", registerView)
-	http.HandleFunc("/createCharacter", createCharacterView)
-	http.HandleFunc("/getGameInfoFromCharacter/", getGameInfoFromCharacterView)
-	http.HandleFunc("/getGameInfoById/", getGameInfoByIdView)
-	fmt.Println("Started")
-	err := http.ListenAndServe(":6110", nil)
+	fmt.Println("Try to get access to characters")
+	characters, err := getAllCharacters()
 	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
+		fmt.Println("Error")
+		return
 	}
+	fmt.Println("Success!")
+
+	fmt.Println("Try to get access to ladder")
+	ladder, err := parseLadder()
+	if err != nil {
+		fmt.Println("Error")
+		return
+	}
+	fmt.Println("Success")
+
+	fmt.Println("Try to get access to status")
+	status, err := getStatus()
+	if err != nil {
+		fmt.Println("Error")
+		return
+	}
+	fmt.Println("Success")
+
+	fmt.Println("Try to get access to gamelist")
+	_, err = getAllGames()
+	if err != nil {
+		fmt.Println("Error")
+		return
+	}
+	fmt.Println("Success")
+
+	fmt.Println("Try to get access to users")
+	users, err := getAllCharacters()
+	if err != nil {
+		fmt.Println("Error")
+		return
+	}
+	fmt.Println("Success")
+
+	fmt.Println("Started")
+	lostConnection := false
+
+	for {
+		//query := map[string]string{"server": server}
+		query := url.Values{}
+		query.Add("server", server)
+
+		new_characters, err := getAllCharacters()
+		if err != nil {
+			query.Add("characters", string(characters))
+		} else {
+			query.Add("characters", string(new_characters))
+			characters = new_characters
+		}
+
+		new_ladder, err := parseLadder()
+		if err != nil {
+			query.Add("ladder", ladder)
+		} else {
+			query.Add("ladder", new_ladder)
+			ladder = new_ladder
+		}
+
+		gamelist, err := getAllGames()
+		if err != nil {
+			query.Add("gamelist", "")
+		} else {
+			query.Add("gamelist", string(gamelist))
+		}
+
+		new_users, err := getAllUsers()
+		if err != nil {
+			query.Add("users", string(users))
+		} else {
+			query.Add("users", string(new_users))
+			users = new_users
+		}
+
+		new_status, err := getStatus()
+		if err != nil {
+			query.Add("status", string(status))
+		} else {
+			query.Add("status", string(new_status))
+			status = new_status
+		}
+
+		_, err = http.PostForm(serviceAddr, query)
+		if err != nil {
+			fmt.Println("Troubles with connection to server. Trying to reconnect...")
+			lostConnection = true
+		} else if err == nil && lostConnection {
+			fmt.Println("Connection restored")
+			lostConnection = false
+		}
+
+		time.Sleep(time.Second)
+	}
+
 }

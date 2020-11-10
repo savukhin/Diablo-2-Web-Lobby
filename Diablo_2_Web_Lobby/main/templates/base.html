@@ -62,6 +62,8 @@
         background-color: #a00;
         min-width: 160px;
         box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.4);
+        margin-left: -16px;
+        margin-top: 14px;
         z-index: 1;
     }
     .dropdown:hover .dropdown-content {
@@ -117,6 +119,7 @@
 <body>
 
 <div style="margin-top: 100px">
+    <p class="warning-text">ЗДЕСЬ МОГЛА БЫТЬ ВАША РЕКЛАМА</p>
     <div align="center">
           {% block content %} {% endblock %}
     </div>
@@ -124,7 +127,14 @@
 
 <div class="header">
     <a class="header-element" href="{% url 'index' %}">Home</a>
-    <a class="header-element" href="{% url 'ladder' %}">Ladder</a>
+    <div class="dropdown header-element">
+        <a style="text-decoration: none; color: #ffffff" href="{% url 'ladder' %}"> Ladder </a>
+        <div class="dropdown-content">
+            <a href="{% url 'ladder exp standard' 'MyServer'%}"><div class="dropdown-element"><p>My Server</p></div></a>
+            <a><div class="dropdown-element"><p>Second server</p></div></a>
+        </div>
+    </div>
+
     <div class="dropdown header-element">
         <a style="text-decoration: none; color: #ffffff" href="{% url 'index' %}"> Servers </a>
         <div class="dropdown-content">
@@ -135,10 +145,8 @@
 
     {% if not request.user.is_authenticated %}
     <a class="header-element"  href="{% url 'sign in' %}">Sign In</a>
-    <a class="header-element"  href="{% url 'sign up' %}">Sign Up</a>
     {% else %}
-    <a class="header-element"  href="{% url 'preLobby' %}">Lobby</a>
-    <a class="header-element"  href="{% url 'profile' request.user.id %}">Profile</a>
+    <a class="header-element"  href="{% url 'profile' user.server user.username %}">Profile</a>
     <a class="header-element"  href="{% url 'messages' %}">Messages</a>
     <a class="header-element"  href="{% url 'sign out' %}">Sign Out</a>
     {% endif %}

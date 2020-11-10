@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/binary"
 	"encoding/json"
-	"fmt"
 	"os"
 	"sort"
 	"strings"
@@ -92,7 +91,7 @@ func reverse(a []character) {
 	}
 }
 
-func get_ladder(file string) string {
+func get_ladder(file string) (string, error) {
 	f, _ := os.Stat(file)
 	size := f.Size()
 	data, _ := os.Open(file)
@@ -100,8 +99,7 @@ func get_ladder(file string) string {
 	bs := make([]byte, 8)
 	_, err := data.Read(bs)
 	if err != nil {
-		fmt.Println("ERROR!", err)
-		return "Error"
+		return "", err
 	}
 	maxtype := int(int32(binary.LittleEndian.Uint32(bs[:4])))
 	//checksum := int(int32(binary.LittleEndian.Uint32(bs[4:])))
@@ -114,8 +112,7 @@ func get_ladder(file string) string {
 		bs = make([]byte, 12)
 		_, err := data.Read(bs)
 		if err != nil {
-			fmt.Println("ERROR!", err)
-			return "ERROR"
+			return "", err
 		}
 		_type := int(int32(binary.LittleEndian.Uint32(bs[:4])))
 		offset := int(int32(binary.LittleEndian.Uint32(bs[4:8])))
@@ -199,14 +196,13 @@ func get_ladder(file string) string {
 
 	ladder, err := json.Marshal(temp)
 	if err != nil {
-		fmt.Println("ERROR", err)
+		return "", err
 	}
 
-	return string(ladder)
+	return string(ladder), nil
 }
 
-func parseLadder() string {
-	file := "D:/PvPGN/Magic_Builder/release/var/ladders/ladder.D2DV"
-	ladder := get_ladder(file)
-	return ladder
+func parseLadder() (string, error) {
+	file := pathToLadderFile
+	return get_ladder(file)
 }

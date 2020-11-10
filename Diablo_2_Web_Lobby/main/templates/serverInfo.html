@@ -28,9 +28,11 @@
 
     .game-block .dropdown-content {
         background-color: rgba(255, 80, 80, 0.8);
+        margin-left: 0px;
+        margin-top: -12px;
     }
 
-    .dropdown-element {
+    .game-block .dropdown-element {
         color: black;
         text-decoration: none;
         font-size: 17px;
@@ -38,7 +40,7 @@
         padding: 1px 10px;
         cursor:pointer;
     }
-    .dropdown-element:hover {
+    .game-block .dropdown-element:hover {
         background-color: #f00;
     }
 
@@ -50,7 +52,7 @@
 <h1>D2Sats Main Page</h1>
 <p>Welcome to <em>D2Stats</em></p>
 <h2>See statistics of Diablo 2 Servers!</h2>
-
+<p class="warning-text">ЗДЕСЬ МОГЛА БЫТЬ ВАША РЕКЛАМА</p>
 <div class="block" style="width:1000px">
     <div class="grid-container header-block">
         <div>ID</div>
@@ -70,7 +72,7 @@
             <div class="dropdown-content">
                 <p style="padding: 1px; font-size: 13px">characters:</p>
                 {% for user in game.Users %}
-                <a href="{% url 'character armory' user.Charname %}"><div class="dropdown-element"><p>{{user.Charname}}</p></div></a>
+                <a href="{% url 'character armory' server user.Charname%}"><div class="dropdown-element"><p>{{user.Charname}}</p></div></a>
                 {% endfor %}
             </div>
 

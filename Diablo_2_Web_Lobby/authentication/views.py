@@ -1,10 +1,9 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from authentication.models import CustomUser, PvpgnBnet
-from authentication.forms import FormReg
-from django.contrib.auth.models import User
-from Diablo_2_Web_Lobby.servers import servers, getCharacter, checkLogin, register, getCharactersFromUser
+from Diablo_2_Web_Lobby.servers import getCharacter, checkLogin, getUser
 from authentication.forms import ChangeAvatarForm
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
@@ -16,46 +15,28 @@ def createPvPGNProfile(name, password, email, isAdmin="false"):
 
 #View for Log in (sign in)
 def signIn(request):
+    if request.user.is_authenticated:
+        return redirect("/")
     if request.method == 'POST': #If 'submit' button has been pressed then try to authenticate
 
-        if checkLogin(servers[request.POST['server']], request.POST['username'], request.POST['password']):
-            user = authenticate(username=request.POST['username'], password=request.POST['password'])
+        if checkLogin(request.POST['server'], request.POST['username'], request.POST['password']):
+            django_username = request.POST['server'] + "_" + request.POST['username']
+            user = authenticate(username=django_username, password=request.POST['password'])
             if user is not None: #If Django found a user then login
                 login(request, user)
-                return redirect('/')
+            else:
+                from django.contrib.auth.forms import UserCreationForm
+                formUser = UserCreationForm({"username": django_username, "password1": request.POST['password'],
+                                      "password2": request.POST['password']})
+
+                formUser.save()
+                NewCustomUser = CustomUser(user=formUser.instance, username=request.POST['username'],
+                                           server=request.POST['server'])
+                NewCustomUser.save()
+                authenticate(username=django_username, password=request.POST['password'])
+            return redirect('/')
 
     return render(request, template_name='signIn.html')
-
-
-#View for Registration
-def signUp(request):
-    if request.method == 'POST': #If 'submit' button has been pressed
-        formUser = FormReg(request.POST)
-        if formUser.is_valid(): #If input data is correct
-            '''
-            #Instance of PvPGN Profile
-            newPvPGNProfile = createPvPGNProfile(request.POST['username'], request.POST['password1'],
-                                                 request.POST['email'])
-            #Instance of Django user
-            formUser.save()
-            #Instance of model which is contains relation between PvPGN profile and Django user
-            NewCustomUser = CustomUser(user=formUser.instance, pvpgn_user=newPvPGNProfile)
-            NewCustomUser.save()
-            #And authentication
-            user = authenticate(username=request.POST['username'], password=request.POST['password1'])
-            login(request, user)
-            '''
-            response = register(servers[request.POST['server']], request.POST['username'],
-                     request.POST['password1'], request.POST['email'])
-            if (response == "Username is taken"):
-                print("Yoh!....")
-                return render(request, template_name='signUp.html', context={"error": "Username is taken"})
-
-            return redirect('/')
-        print("Em....")
-        return render(request, template_name='signUp.html', context={'form': formUser})
-
-    return render(request, template_name='signUp.html')
 
 
 #View for log out (sign out)
@@ -65,20 +46,21 @@ def signOut(request):
 
 
 #View for profile displaying
-def profile(request, id):
+def profile(request, server, username):
     class CharacterForm:
         def __init__(self):
             self.photo = ""
             self.name = ""
-    djangoUser = User.objects.get(id=id)
-    customUser = CustomUser.objects.get(user_id=djangoUser.id)
-    #characters = Character.objects.filter(player_id=customUser.id)
+    customUser = CustomUser.objects.get(username=username)
 
-    characters = getCharactersFromUser(servers[request.path.split("/")[1]], customUser.user.username)
+    try:
+        characters = getUser(server, username)['characters']
+    except:
+        characters = []
     characters_final = []
     for character in characters:
         try:
-            q = getCharacter(servers[request.path.split("/")[1]], character)
+            q = getCharacter(customUser.server, character)
             q['header']['class']
             characters_final.append(CharacterForm())
             characters_final[-1].name = character
@@ -94,6 +76,9 @@ def profile(request, id):
             customUser.save()
             return redirect('/profile/' + str(id))
 
+    context = {'request': request,'profile': customUser, 'characters': characters_final, 'form': ChangeAvatarForm()}
+    if request.user.is_authenticated:
+        context["user"] = CustomUser.objects.get(user=request.user)
+
     return render(request, template_name='profile.html',
-                  context={'request': request,'profile': customUser, 'characters': characters_final,
-                           'form': ChangeAvatarForm()})
+                  context=context)

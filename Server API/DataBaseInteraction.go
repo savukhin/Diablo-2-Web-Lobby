@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"strings"
 
 	"fmt"
 	"reflect"
@@ -49,15 +48,16 @@ type pvpgn_bnet struct {
 }
 
 type User struct {
-	Passhash1           string `json:"passhash"`
-	Email               string `json:"email"`
-	Username            string `json:"username"`
-	Lastlogin_ip        string `json:"lastlogin_ip"`
-	Lastlogin_clienttag string `json:"lastlogin_clienttag"`
-	Lastlogin_owner     string `json:"lastlogin_owner"`
-	Lastlogin_time      int    `json:"lastlogin_time"`
-	Userid              int    `json:"userid"`
-	Ctime               string `json:"ctime"`
+	Passhash1           string   `json:"passhash"`
+	Email               string   `json:"email"`
+	Username            string   `json:"username"`
+	Lastlogin_ip        string   `json:"lastlogin_ip"`
+	Lastlogin_clienttag string   `json:"lastlogin_clienttag"`
+	Lastlogin_owner     string   `json:"lastlogin_owner"`
+	Lastlogin_time      int      `json:"lastlogin_time"`
+	Userid              int      `json:"userid"`
+	Ctime               string   `json:"ctime"`
+	Characters          []string `json:"characters"`
 }
 
 var db *sql.DB
@@ -150,51 +150,44 @@ func getUserFromDataBase(username string) (User, error) {
 	}
 	defer rows.Close()
 
-	final_user := User{user.Acct_passhash1, user.Acct_email.String, user.Username, user.Acct_lastlogin_ip.String, user.Acct_lastlogin_clienttag.String, user.Acct_lastlogin_owner.String,
-		int(user.Acct_lastlogin_time.Int64), user.Uid, user.Acct_ctime.String}
-	return final_user, err
-}
-
-func registerUserInDataBase(username string, passhash string, email string) (User, error) {
-	rows, _ := db.Query("SELECT COUNT(*) FROM " + prefix + "bnet;")
-	rows.Next()
-	newid := 0
-	err := rows.Scan(&newid)
+	characters, err := getCharactersFromUser(user.Username)
 	if err != nil {
 		return User{}, err
 	}
-	sqlStatement := `
-	INSERT INTO ` + prefix + `bnet (uid, acct_username, username, acct_userid, acct_passhash1, acct_email, auth_admin, auth_normallogin, auth_changepass, auth_changeprofile, auth_botlogin,	
-		auth_operator, new_at_team_flag, auth_lock, auth_locktime, auth_lockreason, auth_mute, auth_mutetime, auth_mutereason, auth_command_groups, acct_lastlogin_time, acct_lastlogin_owner,
-		acct_lastlogin_clienttag, acct_lastlogin_ip, acct_ctime)
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)`
+	final_user := User{user.Acct_passhash1, user.Acct_email.String, user.Username, user.Acct_lastlogin_ip.String, user.Acct_lastlogin_clienttag.String, user.Acct_lastlogin_owner.String,
+		int(user.Acct_lastlogin_time.Int64), user.Uid, user.Acct_ctime.String, characters}
+	return final_user, err
+}
 
-	_, err = db.Exec(sqlStatement, newid,
-		username,
-		strings.ToLower(username),
-		newid,
-		passhash,
-		email,
-		"false",
-		"true",
-		"true",
-		"true",
-		"false",
-		"false",
-		0,
-		"false",
-		0,
-		nil,
-		"false",
-		0,
-		nil,
-		"1",
-		0,
-		"Panky",
-		"D2XP",
-		"192.168.1.14",
-		"0")
+func getAllUsersFromDataBase() ([]byte, error) {
+	rows, err := db.Query("SELECT * FROM " + prefix + "bnet;")
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	users := []User{}
+	for rows.Next() {
+		user := pvpgn_bnet{}
+		err = rows.Scan(&user.Uid, &user.Acct_username, &user.Username, &user.Acct_userid, &user.Acct_passhash1, &user.Acct_email, &user.Auth_admin, &user.Auth_normallogin, &user.Auth_changepass,
+			&user.Auth_changeprofile, &user.Auth_botlogin, &user.Auth_operator, &user.New_at_team_flag, &user.Auth_lock, &user.Auth_locktime, &user.Auth_lockreason, &user.Auth_mute,
+			&user.Auth_mutetime, &user.Auth_mutereason, &user.Auth_command_groups, &user.Acct_lastlogin_time, &user.Acct_lastlogin_owner, &user.Acct_lastlogin_clienttag, &user.Acct_lastlogin_ip, &user.Acct_ctime)
 
-	user, _ := getUserFromDataBase(username)
-	return user, err
+		if err != nil {
+			continue
+		}
+
+		characters, _ := getCharactersFromUser(user.Username)
+
+		final_user := User{user.Acct_passhash1, user.Acct_email.String, user.Username, user.Acct_lastlogin_ip.String, user.Acct_lastlogin_clienttag.String, user.Acct_lastlogin_owner.String,
+			int(user.Acct_lastlogin_time.Int64), user.Uid, user.Acct_ctime.String, characters}
+
+		users = append(users, final_user)
+	}
+
+	jsonString, err := json.Marshal(users)
+	if err != nil {
+		return nil, err
+	}
+
+	return jsonString, nil
 }

@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from Diablo_2_Web_Lobby.servers import servers, getStatus, getGameList, getGameInfoById
+from Diablo_2_Web_Lobby.servers import servers, getStatus, getGameList
+from authentication.models import CustomUser
 
 # Create your views here.
 
@@ -12,11 +13,11 @@ def serverInfo(request, server):
             self.Users = -1
             self.Difficulty = "None"
 
-    gamelist = getGameList(servers[server])
-    gameInfos = []
-    for game in gamelist:
-        gameInfos.append(getGameInfoById(servers[server], game['ID']))
-    return render(request, template_name='serverInfo.html', context={'server' : server, 'gamelist' : gameInfos})
+    gamelist = getGameList(server)
+    context = {'server' : server, 'gamelist' : gamelist}
+    if request.user.is_authenticated:
+        context["user"] = CustomUser.objects.get(user=request.user)
+    return render(request, template_name='serverInfo.html', context=context)
 
 
 def index(request):
@@ -28,14 +29,16 @@ def index(request):
             self.runningCountOfUsers = 0
 
     context = {'serv' : {}}
-    for server in servers.items():
+    for server in servers.keys():
         s = Server()
-        status = getStatus(server[1])
+        status = getStatus(server)
         s.maxCountOfGames = status['maximumCountOfGames']
         s.runningCountOfGames = status['runningCountOfGames']
         #s.maxCountOfUsers = status['maximumCountOfUsers']
         s.runningCountOfUsers = status['runningCountOfUsers']
         context['serv'][server[1]] = s
-        print(s.maxCountOfGames)
+
+    if request.user.is_authenticated:
+        context["user"] = CustomUser.objects.get(user=request.user)
     return render(request, template_name='index.html',
                   context=context)

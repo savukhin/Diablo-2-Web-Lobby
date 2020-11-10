@@ -1,35 +1,46 @@
-from django.shortcuts import render
-from ladder.LadderParser import parseLadder
-import urllib.request, json
-from Diablo_2_Web_Lobby.servers import servers, getLadder
+from django.shortcuts import render, redirect
+from Diablo_2_Web_Lobby.servers import getLadder
+from authentication.models import CustomUser
 from character.models import Character
 # Create your views here.
 
 
-def ladderNorStandard(request):
-    ladder = getLadder(servers[request.path.split('/')[1]], 'nor', 0)
+def ladder(request):
+    return redirect("/")
+
+
+def ladderNorStandard(request, server):
+    ladder = getLadder(server, 'nor', 0)
+    context = {'ladder': ladder, 'title': 'Diablo 2 Standard Ladder', 'server': server}
+    if request.user.is_authenticated:
+        context["user"] = CustomUser.objects.get(user=request.user)
     return render(request, template_name='ladder.html',
-                  context={'ladder' : ladder,
-                           'title' : 'Diablo 2 Standard Ladder'})
+                  context=context)
 
 
-def ladderNorHardcore(request):
-    ladder = getLadder(servers[request.path.split('/')[1]], 'nor', 1)
+def ladderNorHardcore(request, server):
+    ladder = getLadder(server, 'nor', 1)
+    context = {'ladder': ladder, 'title': 'Diablo 2 Standard Ladder', 'server': server}
+    if request.user.is_authenticated:
+        context["user"] = CustomUser.objects.get(user=request.user)
     return render(request, template_name='ladder.html',
-                  context={'ladder' : ladder,
-                           'title' : 'Diablo 2 HardCore Ladder'})
+                  context=context)
 
 
-def ladderExpStandard(request):
-    ladder = getLadder(servers[request.path.split('/')[1]], 'exp', 0)
+def ladderExpStandard(request, server="MyServer"):
+    ladder = getLadder(server, 'exp', 0)
 
+    context = {'ladder': ladder, 'title': 'Diablo 2 Standard Ladder', 'server': server}
+    if request.user.is_authenticated:
+        context["user"] = CustomUser.objects.get(user=request.user)
     return render(request, template_name='ladder.html',
-                  context={'ladder' : ladder,
-                           'title' : 'Diablo 2 Lod Standard Ladder'})
+                  context=context)
 
 
-def ladderExpHardcore(request):
-    ladder = getLadder(servers[request.path.split('/')[1]], 'exp', 1)
+def ladderExpHardcore(request, server):
+    ladder = getLadder(server, 'exp', 1)
+    context = {'ladder': ladder, 'title': 'Diablo 2 Standard Ladder', 'server': server}
+    if request.user.is_authenticated:
+        context["user"] = CustomUser.objects.get(user=request.user)
     return render(request, template_name='ladder.html',
-                  context={'ladder' : ladder,
-                           'title' : 'Diablo 2 LoD HardCore Ladder'})
+                  context=context)

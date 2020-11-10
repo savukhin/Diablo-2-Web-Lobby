@@ -16,20 +16,23 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from django.conf.urls import url
+from Diablo_2_Web_Lobby.servers import proceesInfo
 
 urlpatterns = [
+    path('update/server/info', proceesInfo),
+
     path('admin/', admin.site.urls),
     path('', include('main.urls')),
     path('', include('authentication.urls')),
-    path('', include('lobby.urls')),
+    # path('', include('lobby.urls')),
     path('', include('character.urls')),
     path('', include('dialogues.urls')),
     path('', include('ladder.urls')),
 
-#    path('MyServer/', include('main.urls')),
-    path('MyServer/', include('authentication.urls')),
-    path('MyServer/', include('lobby.urls')),
-    path('MyServer/', include('character.urls')),
+    # path('MyServer/', include('main.urls')),
+    # path('MyServer/', include('authentication.urls')),
+    # path('MyServer/', include('lobby.urls')),
+    # path('MyServer/', include('character.urls')),
     path('MyServer/', include('dialogues.urls')),
-    path('MyServer/', include('ladder.urls')),
+    # path('MyServer/', include('ladder.urls')),
 ]

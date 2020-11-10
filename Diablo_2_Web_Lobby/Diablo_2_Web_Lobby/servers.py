@@ -1,60 +1,101 @@
 import urllib.request, json
 from authentication.passhash import makeHash
 import requests
+import os
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 
-servers = {"MyServer" : "127.0.0.1:6110",
-           "" : "127.0.0.1:6110"}
+servers = {"MyServer" : "127.0.0.1:6110"}
+
+@csrf_exempt
+def proceesInfo(request):
+    if (request.method != "POST"):
+        return HttpResponse("Wrong request method")
+
+    server = request.POST["server"]
+    try:
+        os.mkdir(server)
+    except:
+        pass
+    updateLadder(server, request.POST["ladder"])
+    updateCharacters(server,request.POST["characters"])
+    updateUsers(server, request.POST["users"])
+    updateStatus(server, request.POST["status"])
+    updateGamelist(server, request.POST["gamelist"])
+    return HttpResponse("Nice cock\tawesome dick")
+
+
+def updateGamelist(server, gamelist):
+    f = open(server + "/gamelist", "w")
+    f.write(gamelist)
+    f.close()
+
+def updateLadder(server, ladder):
+    f = open(server + "/ladder", "w")
+    f.write(ladder)
+    f.close()
+
+def updateCharacters(server, characters):
+    f = open(server + "/characters", "w")
+    f.write(characters)
+    f.close()
+
+def updateUsers(server, users):
+    f = open(server + "/users", "w")
+    f.write(users)
+    f.close()
+
+def updateStatus(server, status):
+    f = open(server + "/status", "w")
+    f.write(status)
+    f.close()
 
 #Authentication
+def getUser(server, username):
+    f = open(server + "/users", "r")
+    mystr = f.read()
+    f.close()
+    users = json.loads(mystr)
+    for user in users:
+        if user['username'].lower() == username.lower():
+            return user
+    return "ERROR"
+
+
 def checkLogin(server, username, password):
-    response = requests.post("http://" + server + "/checkLogin", data={'username': username,
-                                                                       "passhash": makeHash(password)})
-    mystr = response.text
-    response.close()
-    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
-        return False
-    return True
+    f = open(server + "/users", "r")
+    mystr = f.read()
+    f.close()
+    users = json.loads(mystr)
+    passhash = makeHash(password)
+
+    for user in users:
+        if user['username'] == username:
+            if user['passhash'] == passhash:
+                return True
+            return False
+
+    return False
 
 
 def register(server, username, password, email):
-    response = requests.post("http://" + server + "/register", data={'username': username,
-                                                                     "passhash": makeHash(password),
-                                                                     'email': email})
-    mystr = response.text
-    response.close()
-    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
-        return False
-    elif mystr[0] == 'U':
-        return "Username is taken"
-
-    return True
+    return False
 
 
 #Character
 def createChar(server, username, passhash, charname, characterClass):
-    response = requests.post("http://" + server + "/createCharacter", data={'username': username,
-                                                                     'passhash': passhash,
-                                                                     'charname': charname,
-                                                                     "characterClass": characterClass
-                                                                     })
-    mystr = response.text
-    response.close()
-    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
-        return False
-    elif mystr[0] == 'C':
-        return "Character name is taken"
-
-    return True
+    return False
 
 
 def getCharacter(server, name):
-    fp = urllib.request.urlopen("http://" + server + "/getCharacter/" + name)
-    mystr = (fp.read()).decode("utf-8")
-    fp.close()
-    if mystr[0] == 'E': #That means the word is Error (not a start of the json)
-        return "ERROR"
-    info = json.loads(mystr)
-    return info
+    f = open(server + "/characters", "r")
+    mystr = f.read()
+    f.close()
+    characters = json.loads(mystr)
+    for character in characters:
+        if character['header']['name'].lower() == name.lower():
+            return character
+    return "ERROR"
 
 
 def getCharactersFromUser(server, username):
@@ -69,11 +110,9 @@ def getCharactersFromUser(server, username):
 
 #Ladder
 def getLadder(server, diabloVersion, isHardcoreMode):
-    fp = urllib.request.urlopen("http://" + server + "/getLadder")
-    mystr = (fp.read()).decode("utf-8")
-    fp.close()
-    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
-        return "ERROR"
+    f = open(server + "/ladder", "r")
+    mystr = f.read()
+    f.close()
     ladder = json.loads(mystr)
 
     if diabloVersion not in ladder.keys():
@@ -83,47 +122,52 @@ def getLadder(server, diabloVersion, isHardcoreMode):
     for char in ladder[diabloVersion]:
         if char['hc'] == isHardcoreMode:
             confirmedLadder.append(char)
-            #if Character.objects.filter(name=char['charname']):
+            # if Character.objects.filter(name=char['charname']):
             #    confirmedLadder.append(char)
     return confirmedLadder
 
 
 #Status
 def getStatus(server):
-    fp = urllib.request.urlopen("http://" + server + "/getStatus/")
-    mystr = (fp.read()).decode("utf-8")
-    fp.close()
-    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
-        return "ERROR"
+    f = open(server + "/status", "r")
+    mystr = f.read()
+    f.close()
     info = json.loads(mystr)
     return info
 
 #Games
 def getGameList(server):
-    fp = urllib.request.urlopen("http://" + server + "/getGamelist/")
-    mystr = (fp.read()).decode("utf-8")
-    fp.close()
-    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
-        return "ERROR"
+    f = open(server + "/gamelist", "r")
+    mystr = f.read()
+    f.close()
     info = json.loads(mystr)
     return info
 
 
 def getGameInfoById(server, id):
-    fp = urllib.request.urlopen("http://" + server + "/getGameInfoById/" + id)
-    mystr = (fp.read()).decode("utf-8")
-    fp.close()
-    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
-        return "ERROR"
-    info = json.loads(mystr)
-    return info
+    f = open(server + "/gamelist", "r")
+    mystr = f.read()
+    f.close()
+    gamelist = json.loads(mystr)
+
+    for game in gamelist:
+        if str(game['GameID']) == str(id):
+            return game
+
+    return "ERROR"
 
 
 def getGameInfoFromCharacter(server, charname):
-    fp = urllib.request.urlopen("http://" + server + "/getGameInfoFromCharacter/" + charname)
-    mystr = (fp.read()).decode("utf-8")
-    fp.close()
-    if mystr[0] == 'E':  # That means the word is Error (not a start of the json)
+    f = open(server + "/gamelist", "r")
+    mystr = f.read()
+    f.close()
+    if mystr == "null":
         return "ERROR"
-    info = json.loads(mystr)
-    return info
+
+    gamelist = json.loads(mystr)
+    for game in gamelist:
+        for user in game['Users']:
+            if user['Charname'].lower() == charname.lower():
+                return game
+
+    return "ERROR"
