@@ -10,7 +10,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const (
+var (
 	prefix           = "pvpgn_"
 	host             = "localhost"
 	port             = 5433

@@ -1,6 +1,6 @@
 package main
 
-const (
+var (
 	server      = "MyServer"
 	serviceAddr = "http://127.0.0.1:8000/update/server/info"
 

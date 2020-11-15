@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from authentication.models import CustomUser, PvpgnBnet
 from Diablo_2_Web_Lobby.servers import getCharacter, checkLogin, getUser
 from authentication.forms import ChangeAvatarForm
+import json
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
@@ -33,7 +34,7 @@ def signIn(request):
                 NewCustomUser = CustomUser(user=formUser.instance, username=request.POST['username'],
                                            server=request.POST['server'])
                 NewCustomUser.save()
-                authenticate(username=django_username, password=request.POST['password'])
+                login(request, user)
             return redirect('/')
 
     return render(request, template_name='signIn.html')
@@ -51,8 +52,12 @@ def profile(request, server, username):
         def __init__(self):
             self.photo = ""
             self.name = ""
-    customUser = CustomUser.objects.get(username=username)
-
+    try:
+        customUser = CustomUser.objects.get(username=username)
+    except:
+        customUser = {'user': {'id': 0}, 'username': username, 'server': server,
+                      'photo': {'url': "/media/Avatars/blankAvatar/blankAvatar.png"},
+                      'notExists': True}
     try:
         characters = getUser(server, username)['characters']
     except:
@@ -60,7 +65,7 @@ def profile(request, server, username):
     characters_final = []
     for character in characters:
         try:
-            q = getCharacter(customUser.server, character)
+            q = getCharacter(server, character)
             q['header']['class']
             characters_final.append(CharacterForm())
             characters_final[-1].name = character

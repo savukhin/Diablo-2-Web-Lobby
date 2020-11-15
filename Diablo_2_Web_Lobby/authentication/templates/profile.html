@@ -35,7 +35,11 @@ label {
             </form>
             {% else %}
             <br>
-                <a href="{% url 'dialogue' profile.user.id %}"><button class="button">Write message</button></a>
+                {% if profile.notExists %}
+                    <p class="warning-text">User has not registered in service</p>
+                {% else %}
+                    <a href="{% url 'dialogue' profile.user.id %}"><button class="button">Write message</button></a>
+                {% endif %}
             {% endif %}
         </div>
         <h1> server: {{ profile.server }} </h1>

@@ -1,12 +1,16 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -68,11 +72,67 @@ func getAllUsers() ([]byte, error) {
 	}
 }
 
+func readConfig() error {
+	file, err := os.Open("config.conf")
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	config := map[string]string{}
+	for scanner.Scan() {
+		line := scanner.Text()
+		if len(line) == 0 || line[0] == '#' { // Comment
+			continue
+		}
+
+		data := strings.Split(line, " = ")
+		if len(data) != 2 {
+			return errors.New("Error in config file")
+		}
+
+		value := data[1]
+		config[data[0]] = value[1 : len(value)-1]
+	}
+
+	server = config["server"]
+	serviceAddr = config["serviceAddr"]
+	fileMode = config["fileMode"]
+	pathToUsersFolder = config["pathToUsersFolder"]
+	prefix = config["prefix"]
+	host = config["host"]
+	port, err = strconv.Atoi(config["port"])
+	if err != nil {
+		return err
+	}
+	DataBaseUser = config["DataBaseUser"]
+	DataBasePassword = config["DataBasePassword"]
+	dbname = config["DataBaseName"]
+	pathToCharSaveFolder = config["pathToCharSaveFolder"]
+	pathToLadderFile = config["pathToLadderFile"]
+	D2GSPassword = config["D2GSPassword"]
+	D2GSAddress = config["D2GSAddress"]
+
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func main() {
 	fmt.Println("Starting app...")
+	fmt.Println("Reading config...")
+	err := readConfig()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Success")
 	if fileMode != "Plain" {
 		fmt.Println("Connecting to database...")
-		err := connectToDatabase()
+		err = connectToDatabase()
 		if err != nil {
 			panic(err)
 		}
