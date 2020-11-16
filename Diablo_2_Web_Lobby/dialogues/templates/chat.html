@@ -29,16 +29,16 @@
 {% block content %}
 
 <div class="block">
-    <a style="text-decoration: none; color: #000000" href="{% url 'profile' subject.user.id %}"><h1>{{ subject.user.username }}</h1></a>
+    <a style="text-decoration: none; color: #000000" href="{% url 'profile' subject.server subject.username %}"><h1>{{ subject.username }}</h1></a>
 
     <div id="main">
         {% for message in messages %}
         <div class="message">
             <div style=" float: left; top:50%">
-                <a href="{% url 'profile' message.Author.user.id %}"><img style="object-fit: cover; width: 100px; height: 100px; border-radius: 50%" src="{{ message.Author.photo.url|file_exists }}"></a>
+                <a href="{% url 'profile' message.Author.server message.Author.username %}"><img style="object-fit: cover; width: 100px; height: 100px; border-radius: 50%" src="{{ message.Author.photo.url|file_exists }}"></a>
             </div>
             <div style="float: left; padding: 0px 20px; transform: translate(0, -10%);">
-                <a href="{% url 'profile' message.Author.user.id %}"><h2 align="left">{{ message.Author.user.username }} </h2></a>
+                <a href="{% url 'profile' message.Author.server message.Author.username %}"><h2 align="left">{{ message.Author.username }} </h2></a>
                 <p align="left">{{ message.text }}</p>
                 <h6 align="left">{{ message.date|date:"G:i" }} </h6>
             </div>
@@ -131,12 +131,12 @@
     document.querySelector('#message-submit').onclick = function(e) {
         const messageInputDom = document.querySelector('#message-input');
         const message = messageInputDom.value;
-        const author = "{{ request.user.username }}";
+        const author = "{{ user.username }}";
 
         chatSocket.send(JSON.stringify({
             'author' : author,
             'message': message,
-            'authorURL' : '{% url 'profile' request.user.id %}',
+            'authorURL' : '{% url 'profile' user.server user.username %}',
             'photo' : '{{ user.photo.url|file_exists }}',
             'date' : Date(),
         }));

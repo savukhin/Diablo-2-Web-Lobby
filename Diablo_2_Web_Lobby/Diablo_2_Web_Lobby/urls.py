@@ -33,6 +33,6 @@ urlpatterns = [
     # path('MyServer/', include('authentication.urls')),
     # path('MyServer/', include('lobby.urls')),
     # path('MyServer/', include('character.urls')),
-    path('MyServer/', include('dialogues.urls')),
+    # path('MyServer/', include('dialogues.urls')),
     # path('MyServer/', include('ladder.urls')),
 ]

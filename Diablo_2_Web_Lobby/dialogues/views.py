@@ -30,9 +30,12 @@ def messages(request):
             dialogues[-1].opponent = users[0]
         dialogues[-1].id = dialogues[-1].opponent.user.id
         dialogues[-1].lastMessage = lastMessage
+
+    context = {'user': CustomUser.objects.get(user_id=request.user.id), 'dialogues': dialogues}
+    if request.user.is_authenticated:
+        context["user"] = CustomUser.objects.get(user=request.user)
     return render(request, template_name='messages.html',
-                  context={'user': CustomUser.objects.get(user_id=request.user.id),
-                           'dialogues': dialogues})
+                  context=context)
 
 
 def dialogue(request, id):
@@ -58,11 +61,13 @@ def dialogue(request, id):
     except:
         messagesInDialogue = None
 
+    context = {'user': CustomUser.objects.get(user_id=request.user.id), 'subject': CustomUser.objects.get(user_id=id),
+                           'messages': messagesInDialogue, 'room_name': currentDialogue.id}
+    if request.user.is_authenticated:
+        context["user"] = CustomUser.objects.get(user=request.user)
+
     return render(request, template_name='chat.html',
-                  context={'user': CustomUser.objects.get(user_id=request.user.id),
-                           'subject': CustomUser.objects.get(user_id=id),
-                           'messages': messagesInDialogue,
-                           'room_name': currentDialogue.id})
+                  context=context)
 
 
 def sendMessage(request):
