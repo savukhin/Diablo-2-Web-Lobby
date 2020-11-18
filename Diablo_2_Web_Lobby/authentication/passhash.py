@@ -5,7 +5,6 @@ import urllib.request
 def makeHash(password):
     url = "https://pvpgn.pro/passhash/api.php?method=hash&password=" + password
     fp = urllib.request.urlopen(url)
-    print((fp.read()).decode('utf-8'))
     return (fp.read()).decode('utf-8')
 '''
     test = ctypes.CDLL('authentication/bnpass.dll')

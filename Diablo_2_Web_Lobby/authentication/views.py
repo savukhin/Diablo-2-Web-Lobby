@@ -3,6 +3,8 @@ from django.contrib.auth import authenticate, login, logout
 from authentication.models import CustomUser, PvpgnBnet
 from Diablo_2_Web_Lobby.servers import getCharacter, checkLogin, getUser
 from authentication.forms import ChangeAvatarForm
+from django.http import HttpResponseNotFound
+
 import json
 from django.contrib.auth.decorators import login_required
 
@@ -34,6 +36,7 @@ def signIn(request):
                 NewCustomUser = CustomUser(user=formUser.instance, username=request.POST['username'],
                                            server=request.POST['server'])
                 NewCustomUser.save()
+                user = authenticate(username=django_username, password=request.POST['password'])
                 login(request, user)
             return redirect('/')
 
@@ -61,7 +64,10 @@ def profile(request, server, username):
     try:
         characters = getUser(server, username)['characters']
     except:
-        characters = []
+        return HttpResponseNotFound("Not found " + username + " on server " + server)
+
+    if (characters == None):
+        characters = ['']
     characters_final = []
     for character in characters:
         try:

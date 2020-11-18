@@ -73,7 +73,7 @@ func getAllUsers() ([]byte, error) {
 }
 
 func readConfig() error {
-	file, err := os.Open("config.conf")
+	file, err := os.Open("config.txt")
 	if err != nil {
 		return err
 	}
