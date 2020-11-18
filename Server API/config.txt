@@ -1,0 +1,27 @@
+# Config file
+# Please don't use any tabulations
+
+# Name of your server (please don't change)
+server = "MyServer"
+serviceAddr = "http://77.222.52.203/update/server/info"
+
+# Plain or Database
+fileMode = "DataBase" 
+# If fileMode is Plain
+
+pathToUsersFolder = "D:/PvPGN/PvPGN/var/users/"
+
+# If fileMode is not Plain
+prefix = "pvpgn_"
+host = "localhost"
+port = "5433"
+DataBaseUser = "postgres"
+DataBasePassword = "1qw34r78"
+DataBaseName = "PvPGN"
+
+pathToCharSaveFolder = "D:/PvPGN/Magic_Builder/release/var/charsave/"
+pathToLadderFile = "D:/PvPGN/Magic_Builder/release/var/ladders/ladder.D2DV"
+
+#D2GS
+D2GSPassword = "abcd123"
+D2GSAddress = "127.0.0.1:8888"
